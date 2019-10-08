@@ -6,21 +6,28 @@
     </head>
     <body>
         <h1>PWA Playlist Generator</h1>
-        <input type="file" webkitdirectory>
-        <ul id="listing"></ul>
-        <audio id="audio-player" controls>
-            <source src="" type="audio/wav">
-            Your browser does not support the audio element.
-        </audio>
+        <input id="input-title" type="text" name="title" value="Undefined Title">
+        <input id="input-dir" type="file" webkitdirectory>
+        <button id="btn-generate-html">Generate HTML</button>
+        <a href="#" id="dl" hidden></a>
+
+        <script src="views/template.js"></script>
 
         <script>
 
-        let $_audio = document.querySelector('#audio-player');
+        let title = 'Undefined Title';
         let audioData = {};
+        let audioList = '';
         
-        document.querySelector('input').addEventListener('change', (event) =>
+        // Title input
+        document.querySelector('input#input-title').addEventListener('input', (event) =>
         {
-            let output = document.querySelector('#listing');
+            title = event.target.value;
+        });
+
+        // Directory input
+        document.querySelector('input#input-dir').addEventListener('change', (event) =>
+        {
             let files = event.target.files;
             
             for (let i = 0; i < files.length; i++)
@@ -33,42 +40,39 @@
                     reader.onload = function(e)
                     {
                         audioData[filename] = e.target.result;
-                        // <a> tag
-                        let itemLink = document.createElement('a');
-                        itemLink.innerHTML = filename;
-                        itemLink.setAttribute('href', '#');
-                        itemLink.setAttribute('data-audio', filename);
-                        itemLink.setAttribute('class', 'audio-src');
-
-                        // <li> tag
-                        let item = document.createElement('li');
-                        item.appendChild(itemLink);
-                        
-                        output.appendChild(item);
+                        audioList += '<li><a href="#" class="audio-src" data-audio="' + filename + '">' + filename + '</a></li>';
                     }
                     reader.readAsDataURL(files[i]);
                 }
             }
         });
 
-        document.addEventListener('click', (event) =>
+        // Click on the Generate HTML button
+        document.querySelector('#btn-generate-html').addEventListener('click', (event) =>
         {
-            if (event.target && event.target.classList.contains('audio-src'))
-            {
-                let filename = event.target.getAttribute('data-audio');
-                let data = audioData[filename];
+            const data = {
+                title: title,
+                audioData: audioData,
+                audioList: audioList
+            };
 
-                if (data)
-                {
-                    $_audio.setAttribute('src', data);                    
-                    $_audio.play();
-                }
-                else
-                {
-                    alert('No data for this audio file : ' + filename);
-                }
-            }
+            generateHtml(data);
         });
+
+        function generateHtml(data)
+        {
+            let html = template(data);
+
+            let blob = new Blob([html], { type: 'text/html' });
+            let blobUrl = window.URL.createObjectURL(blob);
+
+            let dl = document.querySelector('#dl');
+            dl.setAttribute('href', blobUrl);
+            dl.setAttribute('download', title);
+
+            dl.click();
+            window.URL.revokeObjectURL(blobUrl);
+        }
 
         </script>
 
