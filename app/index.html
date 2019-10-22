@@ -11,14 +11,13 @@
         <button id="btn-generate-html">Generate HTML</button>
         <a href="#" id="dl" hidden></a>
 
-        <script src="views/template.js"></script>
+        <script src="template.js"></script>
 
         <script>
 
         let title = 'Undefined Title';
-        let audioData = {};
-        let audioList = '';
-        
+        let audioData = '';
+
         // Title input
         document.querySelector('input#input-title').addEventListener('input', (event) =>
         {
@@ -29,7 +28,7 @@
         document.querySelector('input#input-dir').addEventListener('change', (event) =>
         {
             let files = event.target.files;
-            
+
             for (let i = 0; i < files.length; i++)
             {
                 let filename = files[i].name;
@@ -39,8 +38,7 @@
                     let reader = new FileReader();
                     reader.onload = function(e)
                     {
-                        audioData[filename] = e.target.result;
-                        audioList += '<li><a href="#" class="audio-src" data-audio="' + filename + '">' + filename + '</a></li>';
+                        audioData += '<li><a href="#" class="audio-src" data-name="' + filename + '" data-audio="' + e.target.result + '">' + filename + '</a></li>';
                     }
                     reader.readAsDataURL(files[i]);
                 }
@@ -52,8 +50,7 @@
         {
             const data = {
                 title: title,
-                audioData: audioData,
-                audioList: audioList
+                audioData: audioData
             };
 
             generateHtml(data);
@@ -72,6 +69,23 @@
 
             dl.click();
             window.URL.revokeObjectURL(blobUrl);
+        }
+
+        </script>
+
+        <script>
+
+        if ('serviceWorker' in navigator)
+        {
+            window.addEventListener('load', () =>
+            {
+                console.log('here');
+                navigator.serviceWorker.register('service-worker.js')
+                .then((reg) =>
+                {
+                    console.log('Service worker registered.', reg);
+                });
+            });
         }
 
         </script>

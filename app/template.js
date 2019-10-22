@@ -11,7 +11,7 @@ function template(data)
         <body>
             <div class="container">
                 <h1 class="main-title">${data.title}</h1>
-                <ul id="listing">${data.audioList}</ul>
+                <ul id="listing">${data.audioData}</ul>
                 <audio id="audio-player" controls>
                     <source src="" type="audio/wav">
                     Your browser does not support the audio element.
@@ -19,33 +19,26 @@ function template(data)
             </div>
 
             <script>
-
-            console.log('WORKIIIING');
-
+            
             const $_audio = document.querySelector('#audio-player');
-            //const audioData = ${data.audioData};
 
             // Click on a sound link --> plays it
             document.addEventListener('click', (event) =>
             {
                 if (event.target && event.target.classList.contains('audio-src'))
                 {
-                    let filename = event.target.getAttribute('data-audio');
-                    //let data = audioData[filename];
+                    let filename = event.target.getAttribute('data-name');
+                    let data = event.target.getAttribute('data-audio');
 
-                    console.log(filename);
-                    //console.log(data);
-                    /*
                     if (data)
                     {
-                        $_audio.setAttribute('src', data);                    
+                        $_audio.setAttribute('src', data);
                         $_audio.play();
                     }
                     else
                     {
                         alert('No data for this audio file : ' + filename);
                     }
-                    */
                 }
             });
 
