@@ -19,7 +19,7 @@ function template(data)
             </div>
 
             <script>
-            
+
             const $_audio = document.querySelector('#audio-player');
 
             // Click on a sound link --> plays it
@@ -41,6 +41,29 @@ function template(data)
                     }
                 }
             });
+
+            </script>
+
+            <script>
+
+            if ('serviceWorker' in navigator)
+            {
+                window.addEventListener('load', () =>
+                {
+                    navigator.serviceWorker.register('service-worker.js').then((registration) =>
+                    {
+                        console.log('Service worker registered:', registration);
+                    },
+                    (error) =>
+                    {
+                        console.log('Service worker registration failed:', error);
+                    });
+                });
+            }
+            else
+            {
+                console.log('Service workers are not supported.');
+            }
 
             </script>
 
