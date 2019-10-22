@@ -1,3 +1,3 @@
-# pwa-playlist-generator
+# PWA Playlist Generator
 
-TODO
+Generate Progressive Web Apps to share your music !
