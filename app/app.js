@@ -1,5 +1,6 @@
 
 let title = 'Undefined Title';
+let audioFiles = [];
 let audioData = '';
 let iconImg = '';
 
@@ -16,6 +17,12 @@ document.querySelector('input#input-dir').addEventListener('change', (evt) =>
 
     for (let i = 0; i < files.length; i++)
     {
+        if (files[i].type.includes('audio'))
+        {
+            audioFiles.push(files[i]);
+        }
+
+        /*
         let filename = files[i].name;
 
         if (filename.split('.').pop() === 'wav')
@@ -27,6 +34,7 @@ document.querySelector('input#input-dir').addEventListener('change', (evt) =>
             }
             reader.readAsDataURL(files[i]);
         }
+        */
     }
 });
 
@@ -43,7 +51,8 @@ document.querySelector('#btn-generate-html').addEventListener('click', (evt) =>
 {
     const dataHtml = {
         title: title,
-        audioData: audioData
+        //audioData: audioData
+        audioData: {},  //FIXME
     };
 
     const dataManifest = {
@@ -66,6 +75,13 @@ function generateZip(dataHtml, dataManifest)
     zip.file('manifest.json', manifest);
     zip.file('service-worker.js', serviceWorker);
     zip.file('icon.png', iconImg, {base64: true});
+
+    // Audio files
+    let audio = zip.folder('audio');
+    for (let i = 0; i < audioFiles.length; i++)
+    {
+        audio.file(audioFiles[i].name, audioFiles[i]);
+    }
 
     zip.generateAsync({
         type: 'blob'

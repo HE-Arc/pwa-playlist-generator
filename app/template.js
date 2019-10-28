@@ -131,6 +131,7 @@ function template_service_worker()
     // Add list of files to cache here.
     const FILES_TO_CACHE = [
         'index.html',
+        'audio',
     ];
 
     // Files to cache
