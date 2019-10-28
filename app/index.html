@@ -7,11 +7,18 @@
     </head>
     <body>
         <h1>PWA Playlist Generator</h1>
-        <input id="input-title" type="text" name="title" value="Undefined Title">
-        <input id="input-dir" type="file" webkitdirectory>
+        <label for="title">Title</label>
+        <input id="input-title" name="title" type="text" value="Undefined Title">
+        <label for="dir">Directory</label>
+        <input id="input-dir" name="dir" type="file" webkitdirectory>
+        <label for="icon">Icon</label>
+        <input id="input-icon" name="icon" type="file" accept="image/x-png">
+        <img id="uploaded-icon">
         <button id="btn-generate-html">Generate HTML</button>
+
         <a href="#" id="dl" hidden></a>
 
+        <script src="jszip.js"></script>
         <script src="template.js"></script>
         <script src="app.js"></script>
         <script src="pwa.js"></script>

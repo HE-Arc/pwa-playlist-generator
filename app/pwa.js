@@ -26,7 +26,9 @@ window.addEventListener('beforeinstallprompt', (e) =>
     // Stash the event so it can be triggered later.
     deferredPrompt = e;
 
-    deferredPrompt.prompt();
+    deferredPrompt.prompt()
+    .then(res => console.log(res))
+    .catch(error => console.log(error.message));
     // Wait for the user to respond to the prompt
     deferredPrompt.userChoice.then((choiceResult) =>
     {
