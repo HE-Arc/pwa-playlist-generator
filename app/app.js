@@ -15,16 +15,23 @@ document.querySelector('input#input-dir').addEventListener('change', (evt) =>
 {
     let files = evt.target.files;
 
+    // Iterates over each uploaded file
     for (let i = 0; i < files.length; i++)
     {
+        // Filters the audio files
         if (files[i].type.includes('audio'))
         {
+            let filename = files[i].name;
+            let filepath = files[i].webkitRelativePath;
+            let filedir = filepath.split('/').slice(0, -1).join('/');
+
             audioFiles.push(files[i]);
 
-            let filename = files[i].name;
-            audioTree += '<li><a href="audio/' + filename + '" class="audio-src">' + filename + '</a><a href="audio/' + filename + '" class="cache-audio">Download</a></li>';
+            audioTree += '<li><a href="audio/' + filepath + '" class="audio-src">' + filename + '</a><a href="audio/' + filepath + '" class="cache-audio">Download</a></li>';
         }
     }
+
+    document.querySelector('#audio-files').innerHTML = audioTree;
 });
 
 // Icon input
