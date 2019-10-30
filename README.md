@@ -2,4 +2,4 @@
 
 Generate Progressive Web Apps to share your music !
 
-[Demo](https://he-arc.github.io/pwa-playlist-generator/)
+[Demo](https://he-arc.github.io/pwa-playlist-generator/app)
