@@ -1,17 +1,17 @@
 
-let title = 'Undefined Title';
+let title = 'PWA Playlist Generator';
 let audioFiles = [];
 let audioTree = '';
 let iconImg = '';
 
-// Title input
-document.querySelector('input#input-title').addEventListener('input', (evt) =>
+// Title input on input event
+document.querySelector('input#input-pwa-title').addEventListener('input', (evt) =>
 {
     title = evt.target.value;
 });
 
-// Directory input
-document.querySelector('input#input-dir').addEventListener('change', (evt) =>
+// Root folder input on change event
+document.querySelector('input#input-pwa-root-folder').addEventListener('change', (evt) =>
 {
     let files = evt.target.files;
 
@@ -22,28 +22,26 @@ document.querySelector('input#input-dir').addEventListener('change', (evt) =>
         if (files[i].type.includes('audio'))
         {
             let filename = files[i].name;
-            let filepath = files[i].webkitRelativePath;
-            let filedir = filepath.split('/').slice(0, -1).join('/');
 
             audioFiles.push(files[i]);
 
-            audioTree += '<li><a href="audio/' + filepath + '" class="audio-src">' + filename + '</a><a href="audio/' + filepath + '" class="cache-audio">Download</a></li>';
+            audioTree += '<li><a href="audio/' + filename + '" class="audio-src">' + filename + '</a><a href="audio/' + filename + '" class="cache-audio">Download</a></li>';
         }
     }
 
     document.querySelector('#audio-files').innerHTML = audioTree;
 });
 
-// Icon input
-document.querySelector('input#input-icon').addEventListener('change', (evt) =>
+// Icon input on change event
+document.querySelector('input#input-pwa-icon').addEventListener('change', (evt) =>
 {
     iconImg = evt.target.files[0];
-    let img = document.querySelector('#uploaded-icon');
-    img.src = URL.createObjectURL(evt.target.files[0]);
+    //let img = document.querySelector('#uploaded-icon');
+    //img.src = URL.createObjectURL(evt.target.files[0]);
 });
 
 // Click on the Generate HTML button
-document.querySelector('#btn-generate-html').addEventListener('click', (evt) =>
+document.querySelector('#btn-pwa-generate').addEventListener('click', (evt) =>
 {
     const dataHtml = {
         title: title,
