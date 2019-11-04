@@ -1,4 +1,6 @@
 
+'use strict';
+
 let title = 'PWA Playlist Generator';
 let audioFiles = [];
 let audioTree = '';
@@ -14,22 +16,13 @@ document.querySelector('input#input-pwa-title').addEventListener('input', (evt) 
 document.querySelector('input#input-pwa-root-folder').addEventListener('change', (evt) =>
 {
     let files = evt.target.files;
+    let filesTree = buildFilesTree(files);
 
-    // Iterates over each uploaded file
-    for (let i = 0; i < files.length; i++)
-    {
-        // Filters the audio files
-        if (files[i].type.includes('audio'))
-        {
-            let filename = files[i].name;
+    console.log(filesTree);
 
-            audioFiles.push(files[i]);
+    //audioTree += '<li><a href="audio/' + filename + '" class="audio-src">' + filename + '</a><a href="audio/' + filename + '" class="cache-audio">Download</a></li>';
 
-            audioTree += '<li><a href="audio/' + filename + '" class="audio-src">' + filename + '</a><a href="audio/' + filename + '" class="cache-audio">Download</a></li>';
-        }
-    }
-
-    document.querySelector('#audio-files').innerHTML = audioTree;
+    //document.querySelector('#audio-files').innerHTML = audioTree;
 });
 
 // Icon input on change event
@@ -57,6 +50,46 @@ document.querySelector('#btn-pwa-generate').addEventListener('click', (evt) =>
     generateZip(dataHtml, dataManifest);
 });
 
+// Builds a tree structure with the uploaded files
+function buildFilesTree(filesList)
+{
+    let filesTree = new Map();
+
+    // Iterates over each uploaded file
+    for (let i = 0; i < filesList.length; i++)
+    {
+        let file = filesList[i];
+
+        // Filters the audio files
+        if (file.type.includes('audio'))
+        {
+            let filename = file.name;
+            let relativePath = file.webkitRelativePath;
+            // This file parent folders (array)
+            let fileParents = relativePath.split('/').slice(0, -1);
+            let currentFolder = filesTree;
+
+            // Iterates over each parent folder of the current file
+            for (let f = 0; f < fileParents.length; f++)
+            {
+                // This folder is not in the files tree yet
+                if (!currentFolder.has(fileParents[f]))
+                {
+                    currentFolder.set(fileParents[f], new Map());
+                }
+
+                currentFolder = currentFolder.get(fileParents[f]);
+            }
+
+            // Adds this file to its first parent folder
+            currentFolder.set(filename, file);
+        }
+    }
+
+    return filesTree;
+}
+
+// Generates the PWA in a zip file
 function generateZip(dataHtml, dataManifest)
 {
     let html = template_html(dataHtml);
