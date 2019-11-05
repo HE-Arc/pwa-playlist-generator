@@ -13,7 +13,7 @@ function template_html(data)
         <body>
             <div class="container">
                 <h1 class="main-title">${data.title}</h1>
-                <ul id="listing">${data.audioTree}</ul>
+                <div id="audio-tree">${data.audioTree}</div>
                 <audio id="audio-player" controls>
                     <source src="">
                     Your browser does not support the audio element.
@@ -40,10 +40,10 @@ a,
 a:visited {
     color: #ad0000;
 }
-#listing a {
+#audio-tree a {
     display: inline-block;
 }
-#listing a.cache-audio {
+#audio-tree a.cache-audio {
     margin-left: 10px;
 }
     `;

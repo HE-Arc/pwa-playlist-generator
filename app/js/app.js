@@ -2,9 +2,10 @@
 'use strict';
 
 let title = 'PWA Playlist Generator';
-let audioFiles = [];
 let audioTree = '';
 let iconImg = '';
+
+let zipBuilder = new JSZip();
 
 // Title input on input event
 document.querySelector('input#input-pwa-title').addEventListener('input', (evt) =>
@@ -16,26 +17,31 @@ document.querySelector('input#input-pwa-title').addEventListener('input', (evt) 
 document.querySelector('input#input-pwa-root-folder').addEventListener('change', (evt) =>
 {
     let files = evt.target.files;
+    // Builds a tree structure with the uploaded files
     let filesTree = buildFilesTree(files);
 
-    console.log(filesTree);
+    // Builds the HTML tree based on the tree structure
+    audioTree = folderRecursiveBuild(filesTree);
 
-    //audioTree += '<li><a href="audio/' + filename + '" class="audio-src">' + filename + '</a><a href="audio/' + filename + '" class="cache-audio">Download</a></li>';
-
-    //document.querySelector('#audio-files').innerHTML = audioTree;
+    // Displays the HTML tree structure
+    document.querySelector('#audio-tree').innerHTML = audioTree;
 });
 
 // Icon input on change event
 document.querySelector('input#input-pwa-icon').addEventListener('change', (evt) =>
 {
     iconImg = evt.target.files[0];
-    //let img = document.querySelector('#uploaded-icon');
-    //img.src = URL.createObjectURL(evt.target.files[0]);
+
+    // Displays the uploaded icon
+    let uploadedIcon = document.querySelector('#uploaded-icon');
+    uploadedIcon.src = URL.createObjectURL(evt.target.files[0]);
 });
 
 // Click on the Generate HTML button
 document.querySelector('#btn-pwa-generate').addEventListener('click', (evt) =>
 {
+    evt.preventDefault();
+
     const dataHtml = {
         title: title,
         audioTree: audioTree,
@@ -89,6 +95,33 @@ function buildFilesTree(filesList)
     return filesTree;
 }
 
+//
+function folderRecursiveBuild(currentFolder, parentFolder=zipBuilder)
+{
+   let htmlTree = '';
+
+    for (let [k, v] of currentFolder)
+    {
+        // Audio file
+        //FIXME: to improve ; cannot have a folder with a .
+        if (k.includes('.'))
+        {
+            parentFolder.file(v.name, v);
+
+            htmlTree += '<li><a href="' + v.webkitRelativePath + '" class="audio-src">' + v.name + '</a><a href="' + v.webkitRelativePath + '" class="cache-audio">Download</a></li>';
+        }
+        // Folder
+        else
+        {
+            htmlTree += '<ul><li>' + k + '</li>';
+            htmlTree += folderRecursiveBuild(v, parentFolder.folder(k));
+            htmlTree += '</ul>';
+        }
+    }
+
+    return htmlTree;
+}
+
 // Generates the PWA in a zip file
 function generateZip(dataHtml, dataManifest)
 {
@@ -99,35 +132,26 @@ function generateZip(dataHtml, dataManifest)
     let serviceWorkerJs = template_service_worker();
     let manifest = template_manifest(dataManifest);
 
-    // zip file (root)
-    let zip = new JSZip();
-    zip.file('index.html', html);
+    // index
+    zipBuilder.file('index.html', html);
 
     // css folder
-    let css = zip.folder('css');
+    let css = zipBuilder.folder('css');
     css.file('app.css', appCss);
 
     // js folder
-    let js = zip.folder('js');
+    let js = zipBuilder.folder('js');
     js.file('app.js', appJs);
 
     // PWA files
-    zip.file('manifest.json', manifest);
-    zip.file('icon.png', iconImg, {base64: true});
+    zipBuilder.file('manifest.json', manifest);
+    zipBuilder.file('icon.png', iconImg, {base64: true});
     //FIXME: Keep it that way ? Or in js dir with relative path ?
-    zip.file('service-worker.js', serviceWorkerJs);
-    zip.file('pwa.js', pwaJs);
-
-    // Audio folder
-    let audio = zip.folder('audio');
-    // Audio files
-    for (let i = 0; i < audioFiles.length; i++)
-    {
-        audio.file(audioFiles[i].name, audioFiles[i]);
-    }
+    zipBuilder.file('service-worker.js', serviceWorkerJs);
+    zipBuilder.file('pwa.js', pwaJs);
 
     // Generates the zip file
-    zip.generateAsync({
+    zipBuilder.generateAsync({
         type: 'blob'
     })
     .then((content) =>
