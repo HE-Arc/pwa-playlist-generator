@@ -7,6 +7,7 @@ function template_html(data)
         <head>
             <meta charset="utf-8">
             <title>${data.title}</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link rel="manifest" href="manifest.json">
             <link rel="stylesheet" href="css/app.css">
         </head>
@@ -18,6 +19,8 @@ function template_html(data)
                     <source src="">
                     Your browser does not support the audio element.
                 </audio>
+                <button id="audio-previous">Previous</button>
+                <button id="audio-next">Next</button>
             </div>
 
             <script src="js/app.js"></script>
@@ -54,29 +57,116 @@ function template_app_js()
     return `
 'use strict';
 
-const $_audioPlayer = document.querySelector('#audio-player');
+const $$ = {
+    audioPlayer: document.querySelector('#audio-player'),
+    audioTree: document.querySelector('#audio-tree'),
+};
 
-// Click on a sound link --> plays it
+// Audio player actions enum
+const AudioPlayerActions = Object.freeze(
+    {
+        'NEXT': 0,
+        'PREVIOUS': 1,
+        'RANDOM': 2,
+    }
+);
+
+let currentAudioFile = '';
+
+// Returns the current audio file data-id
+function getCurrentAudioFileId()
+{
+    return parseInt(currentAudioFile.getAttribute('data-id'));
+}
+
+// Sets the current audio file corresponding to the given id
+function setNextAudioFileById(id)
+{
+    let nextAudioFile = $$.audioTree.querySelector('.audio-src[data-id="' + id + '"]');
+
+    // There is a next audio file to play
+    if (nextAudioFile !== null)
+    {
+        currentAudioFile = nextAudioFile;
+
+        return true;
+    }
+
+    // No next audio file
+    return false;
+}
+
+// Plays the next audio file based on the given audio player action
+function playNextAudioFile(action)
+{
+    let currentId = getCurrentAudioFileId();
+    let canPlayNext = false;
+
+    switch (action)
+    {
+        case AudioPlayerActions.NEXT:
+            canPlayNext = setNextAudioFileById(currentId + 1);
+            break;
+        case AudioPlayerActions.PREVIOUS:
+            canPlayNext = setNextAudioFileById(currentId - 1);
+            break;
+        case AudioPlayerActions.RANDOM:
+            console.log('TODO');
+            break;
+        default:
+            console.log('Not a valid action:', action);
+            break;
+    }
+
+    // Plays the audio file
+    if (canPlayNext)
+    {
+        playCurrentAudioFile();
+    }
+}
+
+// Plays the current audio file
+function playCurrentAudioFile()
+{
+    if (currentAudioFile)
+    {
+        $$.audioPlayer.setAttribute('src', currentAudioFile.getAttribute('href'));
+        //FIXME: there could be download erros ; maybe use a promise to handle the case
+        $$.audioPlayer.play();
+    }
+    //FIXME: no need for this block if using a promise
+    else
+    {
+        alert('No source file for this audio file.');
+    }
+}
+
+// Click on an audio file
 document.addEventListener('click', (evt) =>
 {
     if (evt.target && evt.target.classList.contains('audio-src'))
     {
         evt.preventDefault();
 
-        let audioFile = evt.target.getAttribute('href');
-
-        if (audioFile)
-        {
-            $_audioPlayer.setAttribute('src', audioFile);
-            $_audioPlayer.play();
-        }
-        else
-        {
-            alert('No source file for this audio file.');
-        }
+        // Plays the audio file
+        currentAudioFile = evt.target;
+        playCurrentAudioFile();
     }
 });
 
+// Click on next audio file
+document.querySelector('#audio-next').addEventListener('click', (evt) =>
+{
+    playNextAudioFile(AudioPlayerActions.NEXT);
+});
+
+// Click on previous audio file
+document.querySelector('#audio-previous').addEventListener('click', (evt) =>
+{
+    playNextAudioFile(AudioPlayerActions.PREVIOUS);
+});
+
+// Click on download audio file
 document.addEventListener('click', (evt) =>
 {
     if (evt.target && evt.target.classList.contains('cache-audio'))
@@ -85,6 +175,7 @@ document.addEventListener('click', (evt) =>
 
         let audioFile = evt.target.getAttribute('href');
 
+        // Caches the audio file for offline listening
         if (audioFile)
         {
             caches.open('audio-cache').then((cache) =>
@@ -100,7 +191,7 @@ document.addEventListener('click', (evt) =>
         }
         else
         {
-            alert('No sorce file for this audio file.');
+            alert('No source file for this audio file.');
         }
     }
 });
