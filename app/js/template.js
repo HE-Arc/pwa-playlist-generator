@@ -163,7 +163,16 @@ document.querySelector('#audio-next').addEventListener('click', (evt) =>
 // Click on previous audio file
 document.querySelector('#audio-previous').addEventListener('click', (evt) =>
 {
-    playNextAudioFile(AudioPlayerActions.PREVIOUS);
+    // Rewinds audio file
+    if ($$.audioPlayer.currentTime > PLAYER_REWIND_TIME)
+    {
+        $$.audioPlayer.currentTime = 0;
+    }
+    // Plays previous audio file
+    else
+    {
+        playNextAudioFile(AudioPlayerActions.PREVIOUS);
+    }
 });
 
 // On ended audio player
