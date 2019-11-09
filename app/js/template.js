@@ -166,6 +166,13 @@ document.querySelector('#audio-previous').addEventListener('click', (evt) =>
     playNextAudioFile(AudioPlayerActions.PREVIOUS);
 });
 
+// On ended audio player
+$$.audioPlayer.addEventListener('ended', (evt) =>
+{
+    //FIXME: playNextAudioFile(AudioPlayerActions.RANDOM); when RANDOM implemented
+    playNextAudioFile(AudioPlayerActions.NEXT);
+});
+
 // Click on download audio file
 document.addEventListener('click', (evt) =>
 {
