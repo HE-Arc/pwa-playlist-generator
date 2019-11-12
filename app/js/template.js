@@ -112,7 +112,7 @@ function setNextAudioFileById(id)
 
 function displayCurrentAudioFile()
 {
-    let title = currentAudioFile.innerHTML;
+    let title = currentAudioFile.getAttribute('data-title');
     document.querySelector('#current-audio-file').innerHTML = title;
 }
 

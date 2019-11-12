@@ -99,7 +99,7 @@ function buildFilesTree(filesList)
 let audioFileID = 1;
 
 //
-function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder)
+function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder, titleLevel = 1)
 {
    let htmlTree = '';
 
@@ -111,15 +111,18 @@ function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder)
         {
             zipParentFolder.file(name, value);
 
-            htmlTree += '<li><a href="' + value.webkitRelativePath + '" class="audio-src" data-id="' + audioFileID + '">' + value.name + '</a><a href="' + value.webkitRelativePath + '" class="cache-audio">Download</a></li>';
+            // File name without extension
+            let title = name.split('.').slice(0, -1).join('.');
+
+            htmlTree += '<li><a href="' + value.webkitRelativePath + '" class="audio-src" data-id="' + audioFileID + '" data-title="' + title + '">' + value.name + '</a><a href="' + value.webkitRelativePath + '" class="cache-audio">Download</a></li>';
 
             ++audioFileID;
         }
         // Folder
         else
         {
-            htmlTree += '<ul><li>' + name + '</li>';
-            htmlTree += folderRecursiveBuild(value, zipParentFolder.folder(name));
+            htmlTree += '<ul><h' + titleLevel + '>' + name + '</h' + titleLevel + '>';
+            htmlTree += folderRecursiveBuild(value, zipParentFolder.folder(name), titleLevel + 1);
             htmlTree += '</ul>';
         }
     }
