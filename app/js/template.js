@@ -21,6 +21,10 @@ function template_html(data)
                 </audio>
                 <button id="audio-previous">Previous</button>
                 <button id="audio-next">Next</button>
+                <label for="audio-repeat">Repeat</label>
+                <input id="audio-repeat" type="checkbox" name="audio-repeat">
+                <button id="audio-random">Random</button>
+                <p id="current-audio-file"></p>
             </div>
 
             <script src="js/app.js"></script>
@@ -60,6 +64,7 @@ function template_app_js()
 const $$ = {
     audioPlayer: document.querySelector('#audio-player'),
     audioTree: document.querySelector('#audio-tree'),
+    audioFileRepeat: document.querySelector('#audio-repeat'),
 };
 
 // Audio player actions enum
@@ -67,11 +72,20 @@ const AudioPlayerActions = Object.freeze(
     {
         'NEXT': 0,
         'PREVIOUS': 1,
-        'RANDOM': 2,
+        'RANDOM_NEXT': 2,
+        'RANDOM_PREVIOUS': 3,
     }
 );
 
+const PLAYER_REWIND_TIME = 3;
+
+const TOTAL_AUDIO_FILES = $$.audioTree.getElementsByClassName('audio-src').length;
+let isRandom = false;
+let randomQueue = [];
+let randomHistory = [];
+
 let currentAudioFile = '';
+let currentAudioFileRepeated = false;
 
 // Returns the current audio file data-id
 function getCurrentAudioFileId()
@@ -96,22 +110,30 @@ function setNextAudioFileById(id)
     return false;
 }
 
+function displayCurrentAudioFile()
+{
+    let title = currentAudioFile.innerHTML;
+    document.querySelector('#current-audio-file').innerHTML = title;
+}
+
 // Plays the next audio file based on the given audio player action
 function playNextAudioFile(action)
 {
-    let currentId = getCurrentAudioFileId();
     let canPlayNext = false;
 
     switch (action)
     {
         case AudioPlayerActions.NEXT:
-            canPlayNext = setNextAudioFileById(currentId + 1);
+            canPlayNext = setNextAudioFileById(getCurrentAudioFileId() + 1);
             break;
         case AudioPlayerActions.PREVIOUS:
-            canPlayNext = setNextAudioFileById(currentId - 1);
+            canPlayNext = setNextAudioFileById(getCurrentAudioFileId() - 1);
             break;
-        case AudioPlayerActions.RANDOM:
-            console.log('TODO');
+        case AudioPlayerActions.RANDOM_NEXT:
+            canPlayNext = setNextAudioFileById(nextRandomId());
+            break;
+        case AudioPlayerActions.RANDOM_PREVIOUS:
+            canPlayNext = setNextAudioFileById(previousRandomId());
             break;
         default:
             console.log('Not a valid action:', action);
@@ -130,6 +152,8 @@ function playCurrentAudioFile()
 {
     if (currentAudioFile)
     {
+        displayCurrentAudioFile();
+
         $$.audioPlayer.setAttribute('src', currentAudioFile.getAttribute('href'));
         //FIXME: there could be download erros ; maybe use a promise to handle the case
         $$.audioPlayer.play();
@@ -157,7 +181,14 @@ document.addEventListener('click', (evt) =>
 // Click on next audio file
 document.querySelector('#audio-next').addEventListener('click', (evt) =>
 {
-    playNextAudioFile(AudioPlayerActions.NEXT);
+    if (isRandom)
+    {
+        playNextAudioFile(AudioPlayerActions.RANDOM_NEXT);
+    }
+    else
+    {
+        playNextAudioFile(AudioPlayerActions.NEXT);
+    }
 });
 
 // Click on previous audio file
@@ -171,15 +202,86 @@ document.querySelector('#audio-previous').addEventListener('click', (evt) =>
     // Plays previous audio file
     else
     {
-        playNextAudioFile(AudioPlayerActions.PREVIOUS);
+        if (isRandom)
+        {
+            playNextAudioFile(AudioPlayerActions.RANDOM_PREVIOUS);
+        }
+        else
+        {
+            playNextAudioFile(AudioPlayerActions.PREVIOUS);
+        }
     }
+});
+
+function initRandomQueue()
+{
+    isRandom = true;
+    randomQueue = [];
+    randomHistory = [];
+
+    for (let i = 1; i <= TOTAL_AUDIO_FILES; i++)
+    {
+        randomQueue.push(i);
+    }
+}
+
+function nextRandomId()
+{
+    if (randomQueue.length > 0)
+    {
+        // Interval: [0, randomQueue.length[
+        let randomIndex = Math.floor(Math.random() * randomQueue.length);
+        // Removes this ID from the randomQueue array
+        // splice returns an array
+        let randomId = randomQueue.splice(randomIndex, 1)[0];
+
+        randomHistory.push(randomId);
+
+        return randomId;
+    }
+
+    return false;
+}
+
+function previousRandomId()
+{
+    if (randomHistory.length > 0)
+    {
+        return randomHistory.pop();
+    }
+
+    return false;
+}
+
+document.querySelector('#audio-random').addEventListener('click', (evt) =>
+{
+    initRandomQueue();
+    playNextAudioFile(AudioPlayerActions.RANDOM_NEXT);
 });
 
 // On ended audio player
 $$.audioPlayer.addEventListener('ended', (evt) =>
 {
-    //FIXME: playNextAudioFile(AudioPlayerActions.RANDOM); when RANDOM implemented
-    playNextAudioFile(AudioPlayerActions.NEXT);
+    // Repeats the current audio file
+    if ($$.audioFileRepeat.checked && !currentAudioFileRepeated)
+    {
+        currentAudioFileRepeated = true;
+        $$.audioPlayer.currentTime = 0;
+        $$.audioPlayer.play();
+    }
+    else
+    {
+        currentAudioFileRepeated = false;
+
+        if (isRandom)
+        {
+            playNextAudioFile(AudioPlayerActions.RANDOM_NEXT);
+        }
+        else
+        {
+            playNextAudioFile(AudioPlayerActions.NEXT);
+        }
+    }
 });
 
 // Click on download audio file
