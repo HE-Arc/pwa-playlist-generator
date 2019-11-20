@@ -8,9 +8,10 @@
 
         <!-- STYLES -->
         <link rel="stylesheet" href="css/materialize.min.css">
+        <link rel="stylesheet" href="css/app.css">
 
     </head>
-    <body>
+    <body class="blue-grey darken-4 white-text">
         <div class="container">
             <div class="center">
                 <h1>PWA Playlist Generator</h1>
@@ -18,34 +19,55 @@
                 <section id="pwa-generator">
 
                     <form id="form-pwa-generator">
+                        <div class="row">
 
-                        <div class="input-field col s12">
-                            <input id="input-pwa-title" type="text">
-                            <label for="input-pwa-title">Title</label>
+                            <div class="col s12">
+                                <div class="file-field input-field">
+                                    <div class="btn pink">
+                                        <span>Root folder</span>
+                                        <input id="input-pwa-root-folder" type="file" webkitdirectory>
+                                    </div>
+                                    <div class="file-path-wrapper">
+                                        <input class="file-path validate" type="text">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col s12">
+                                <div class="input-field">
+                                    <input id="input-pwa-title" type="text">
+                                    <label for="input-pwa-title">Application Title</label>
+                                </div>
+                            </div>
+
+                            <div class="col s12">
+                                <div class="file-field input-field">
+                                    <div class="btn pink">
+                                        <span>Icon</span>
+                                        <input id="input-pwa-icon" type="file" accept="image/x-png">
+                                    </div>
+                                    <div class="file-path-wrapper">
+                                        <input class="file-path validate" type="text">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col s12">
+                                <div class="input-field">
+                                    <select>
+                                        <option value="no-theme">No theme</option>
+                                        <option value="light-theme">Light theme</option>
+                                        <option value="dark-theme">Dark theme</option>
+                                    </select>
+                                    <label>Select a theme</label>
+                                </div>
+                            </div>
+
+                            <div class="col s12">
+                                <button id="btn-pwa-generate" class="btn btn-large green waves-effect waves-light">Generate PWA</button>
+                            </div>
+
                         </div>
-
-                        <div class="file-field input-field">
-                            <div class="btn">
-                                <span>Root folder</span>
-                                <input id="input-pwa-root-folder" type="file" webkitdirectory>
-                            </div>
-                            <div class="file-path-wrapper">
-                                <input class="file-path validate" type="text">
-                            </div>
-                        </div>
-
-                        <div class="file-field input-field">
-                            <div class="btn">
-                                <span>Icon</span>
-                                <input id="input-pwa-icon" type="file" accept="image/x-png">
-                            </div>
-                            <div class="file-path-wrapper">
-                                <input class="file-path validate" type="text">
-                            </div>
-                        </div>
-
-                        <button id="btn-pwa-generate" class="btn btn-large waves-effect waves-light">Generate PWA</button>
-
                     </form>
 
                 </section>

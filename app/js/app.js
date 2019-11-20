@@ -7,6 +7,13 @@ let iconImg = '';
 
 let zipBuilder = new JSZip();
 
+// On DOM Content Loaded
+document.addEventListener('DOMContentLoaded', () =>
+{
+    // Materialize Select
+    M.FormSelect.init(document.querySelector('select'), { /* options */ });
+});
+
 // Title input on input event
 document.querySelector('input#input-pwa-title').addEventListener('input', (evt) =>
 {
@@ -92,6 +99,12 @@ function buildFilesTree(filesList)
         }
     }
 
+    // Default application title is the root folder name
+    title = filesTree.keys().next().value;;
+    document.querySelector('#input-pwa-title').value = title;
+    // Triggers the input animation (materialize)
+    document.querySelector('label[for="input-pwa-title"]').classList += 'active';
+
     return filesTree;
 }
 
@@ -114,14 +127,16 @@ function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder, title
             // File name without extension
             let title = name.split('.').slice(0, -1).join('.');
 
-            htmlTree += '<li><a href="' + value.webkitRelativePath + '" class="audio-src" data-id="' + audioFileID + '" data-title="' + title + '">' + value.name + '</a><a href="' + value.webkitRelativePath + '" class="cache-audio">Download</a></li>';
+            htmlTree += '<li href="' + value.webkitRelativePath + '"><a href="' + value.webkitRelativePath + '" class="audio-src" data-id="' + audioFileID + '" data-title="' + title + '">' + value.name + '</a><a href="#" class="cache-audio">Cache</a><a href="#" class="download-audio">Download</a></li>';
 
             ++audioFileID;
         }
         // Folder
         else
         {
-            htmlTree += '<ul><h' + titleLevel + '>' + name + '</h' + titleLevel + '>';
+            let folderTitle = titleLevel === 1 ? ''
+                : '<h' + titleLevel + '>' + name + '</h' + titleLevel + '>';
+            htmlTree += '<ul>' + folderTitle;
             htmlTree += folderRecursiveBuild(value, zipParentFolder.folder(name), titleLevel + 1);
             htmlTree += '</ul>';
         }
