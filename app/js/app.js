@@ -137,6 +137,7 @@ function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder, title
             let folderTitle = titleLevel === 1 ? ''
                 : '<h' + titleLevel + '>' + name + '</h' + titleLevel + '>';
             htmlTree += '<ul>' + folderTitle;
+            htmlTree += '<a href="#" class="cache-folder">Cache</a><a href="#" class="download-folder">Download</a>';
             htmlTree += folderRecursiveBuild(value, zipParentFolder.folder(name), titleLevel + 1);
             htmlTree += '</ul>';
         }
@@ -190,3 +191,129 @@ function generateZip(dataHtml, dataManifest)
         window.URL.revokeObjectURL(blobUrl);
     });
 }
+
+function getAudioHref(element)
+{
+    return element.parentElement.getAttribute('href');
+}
+
+function cacheAudioFile(href)
+{
+    // Caches the audio file for offline listening
+    if (href)
+    {
+        caches.open('audio-cache').then((cache) =>
+        {
+            fetch(href)
+                .then((response) =>
+                {
+                    return response;
+                })
+                .then((file) =>
+                {
+                    cache.add(file.url);
+                    console.log('File cached !');
+                })
+                .catch(() =>
+                {
+                    alert('Error while caching file: ' + href);
+                });
+        });
+    }
+    else
+    {
+        sourceError(href);
+    }
+}
+
+function downloadAudioFile(href)
+{
+    if (href)
+    {
+        fetch(href)
+            .then((resp) =>
+            {
+                return resp.blob();
+            })
+            .then((blob) =>
+            {
+                triggerDownload(blob, href);
+                console.log('File downloaded !');
+            })
+            .catch(() =>
+            {
+                alert('Error while downloading file: ' + href);
+            });
+    }
+    else
+    {
+        sourceError(href);
+    }
+}
+
+function triggerDownload(file, href)
+{
+    const url = window.URL.createObjectURL(file);
+    const a = document.createElement('a');
+
+    a.classList += 'tmp-download';
+    a.style.display = 'none';
+    a.href = url;
+    a.download = href.split('/').pop();
+    document.body.appendChild(a);
+
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    document.body.removeChild(a);
+}
+
+function sourceError(href)
+{
+    alert('No source for this audio file: ' + href);
+}
+
+// Click on download audio file
+document.addEventListener('click', (evt) =>
+{
+    if (evt.target && evt.target.classList.contains('cache-audio'))
+    {
+        evt.preventDefault();
+
+        let href = getAudioHref(evt.target);
+
+        cacheAudioFile(href);
+    }
+});
+
+document.addEventListener('click', (evt) =>
+{
+    if (evt.target && evt.target.classList.contains('download-audio'))
+    {
+        evt.preventDefault();
+
+        let href = getAudioHref(evt.target);
+
+        downloadAudioFile(href);
+    }
+});
+
+document.addEventListener('click', (evt) =>
+{
+    if (evt.target && evt.target.classList.contains('cache-folder'))
+    {
+        evt.preventDefault();
+
+        console.log(evt.target);
+    }
+});
+
+document.addEventListener('click', (evt) =>
+{
+    if (evt.target && evt.target.classList.contains('download-folder'))
+    {
+        evt.preventDefault();
+
+        console.log(evt.target);
+    }
+});
