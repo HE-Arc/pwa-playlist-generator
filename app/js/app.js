@@ -251,6 +251,23 @@ function downloadAudioFile(href)
     }
 }
 
+function recursiveFiles(parent)
+{
+    for (let child of parent.children)
+    {
+        let tagName = child.tagName;
+
+        if (tagName === 'UL')
+        {
+            recursiveFiles(child);
+        }
+        else if (tagName === 'LI')
+        {
+            console.log(child);
+        }
+    }
+}
+
 function triggerDownload(file, href)
 {
     const url = window.URL.createObjectURL(file);
@@ -304,7 +321,7 @@ document.addEventListener('click', (evt) =>
     {
         evt.preventDefault();
 
-        console.log(evt.target);
+        recursiveFiles(evt.target.parentElement);
     }
 });
 
