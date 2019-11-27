@@ -9,23 +9,36 @@ function template_html(data)
             <title>${data.title}</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link rel="manifest" href="manifest.json">
-            <link rel="stylesheet" href="css/app.css">
+
+            <link rel="stylesheet" href="css/materialize.min.css">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+            <link rel="stylesheet" href="css/materialize-based-light.css">
         </head>
         <body>
-            <div class="container">
-                <h1 class="main-title">${data.title}</h1>
-                <div id="audio-tree">${data.audioTree}</div>
-                <audio id="audio-player" controls>
-                    <source src="">
-                    Your browser does not support the audio element.
-                </audio>
-                <button id="audio-previous">Previous</button>
-                <button id="audio-next">Next</button>
-                <label for="audio-repeat">Repeat</label>
-                <input id="audio-repeat" type="checkbox" name="audio-repeat">
-                <button id="audio-random">Random</button>
-                <p id="current-audio-file"></p>
-            </div>
+
+            <header class="header"></header>
+
+            <main class="main">
+                <div class="container">
+                    <h1 class="main-title">${data.title}</h1>
+                    <div id="audio-tree">${data.audioTree}</div>
+                    <audio id="audio-player" controls>
+                        <source src="">
+                        Your browser does not support the audio element.
+                    </audio>
+                    <button id="audio-previous">Previous</button>
+                    <button id="audio-next">Next</button>
+                    <label for="audio-repeat">Repeat</label>
+                    <input id="audio-repeat" type="checkbox" name="audio-repeat">
+                    <button id="audio-random">Random</button>
+                    <p id="current-audio-file"></p>
+                </div>
+            </main>
+
+            <footer class="page-footer"></footer>
+
+            <script src="js/materialize.min.js"></script>
 
             <script src="js/app.js"></script>
             <script src="service-worker.js"></script>
@@ -52,6 +65,73 @@ a:visited {
 }
 #audio-tree a.cache-audio {
     margin-left: 10px;
+}
+    `;
+}
+
+function template_light()
+{
+    return `
+body {
+    color: #000;
+    background: #fff;
+}
+
+.header {
+    background: #f50057;
+    padding: 0.5em 0;
+}
+
+.main {
+    padding: 3em 0;
+}
+
+.page-footer {
+    background: #e5e5e5;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+h1 {
+    font-size: 3em;
+    margin: 0 0 1em 0;
+}
+h2 {
+    font-size: 2.3em;
+    margin: 0 0 0.5em 0;
+}
+h3 {
+    font-size: 2.1em;
+}
+h4 {
+    font-size: 1.9em;
+}
+h5 {
+    font-size: 1.7em;
+}
+h6 {
+    font-size: 1.5em;
+}
+
+ul {
+    margin: 0 0 1.5em 0;
+}
+ul > li {
+    padding: 0.3em 0;
+}
+ul > li > a {
+    color: #00bfa5;
+    font-size: 1.1em;
+    display: inline-block;
+    margin: 0 0.5em 0 0;
+}
+
+/* AUDIO PLAYER */
+#audio-player {
+    /* tmp */
+    margin-top: 2em;
 }
     `;
 }

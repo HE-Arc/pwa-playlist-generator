@@ -127,7 +127,7 @@ function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder, title
             // File name without extension
             let title = name.split('.').slice(0, -1).join('.');
 
-            htmlTree += '<li href="' + value.webkitRelativePath + '"><a href="' + value.webkitRelativePath + '" class="audio-src" data-id="' + audioFileID + '" data-title="' + title + '">' + value.name + '</a><a href="#" class="cache-audio">Cache</a><a href="#" class="download-audio">Download</a></li>';
+            htmlTree += '<li href="' + value.webkitRelativePath + '"><a href="' + value.webkitRelativePath + '" class="audio-src" data-id="' + audioFileID + '" data-title="' + title + '">' + value.name + '</a><a href="#" class="cache-audio"><i class="material-icons">cached</i></a><a href="#" class="download-audio"><i class="material-icons">file_download</i></a></li>';
 
             ++audioFileID;
         }
@@ -149,7 +149,7 @@ function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder, title
 function generateZip(dataHtml, dataManifest)
 {
     let html = template_html(dataHtml);
-    let appCss = template_css();
+    //let appCss = template_css();
     let appJs = template_app_js();
     let pwaJs = template_pwa_js();
     let serviceWorkerJs = template_service_worker();
@@ -160,7 +160,12 @@ function generateZip(dataHtml, dataManifest)
 
     // css folder
     let css = zipBuilder.folder('css');
-    css.file('app.css', appCss);
+    //css.file('app.css', appCss);
+    css.file('materialize-based-light.css', template_light());
+
+
+
+
 
     // js folder
     let js = zipBuilder.folder('js');
@@ -190,3 +195,16 @@ function generateZip(dataHtml, dataManifest)
         window.URL.revokeObjectURL(blobUrl);
     });
 }
+
+document.addEventListener('DOMContentLoaded', (evt) =>
+{
+    fetch('themes/materialize-based/materialize-based-light.css')
+        .then((file) =>
+        {
+            console.log(file);
+        })
+        .catch((error) =>
+        {
+            console.log(error);
+        });
+});
