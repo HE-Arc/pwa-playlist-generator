@@ -263,7 +263,8 @@ function recursiveFiles(parent)
         }
         else if (tagName === 'LI')
         {
-            console.log(child);
+            let href = child.getAttribute('href');
+            cacheAudioFile(href);
         }
     }
 }
