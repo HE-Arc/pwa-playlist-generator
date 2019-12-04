@@ -181,114 +181,130 @@ function generateZip(dataHtml, dataManifest)
     })
     .then((blob) =>
     {
+        // Triggers the download
         triggerDownload(title, blob);
     });
 }
 
+// Returns the filename without its path and with/out the extension
+function filenameWithoutPath(filename, ext = false)
+{
+    // Filename without path and with extension
+    let withoutPath = filename.split('/').pop();
+
+    if (ext)
+    {
+        return withoutPath;
+    }
+
+    // Filename without path and without extension
+    return withoutPath.split('.').slice(0, -1).join('.');
+}
+
+// Returns the element URL
 function getAudioHref(element)
 {
     return element.parentElement.getAttribute('href');
 }
 
+// Fetches the audio file associated to the URL and then caches it
 function cacheAudioFile(href)
 {
     // Caches the audio file for offline listening
-    if (href)
+    caches.open('audio-cache').then((cache) =>
     {
-        caches.open('audio-cache').then((cache) =>
-        {
-            fetch(href)
-                .then((response) =>
-                {
-                    return response;
-                })
-                .then((file) =>
-                {
-                    cache.add(file.url);
-                    console.log('File cached: ' + href);
-                })
-                .catch(() =>
-                {
-                    alert('Error while caching file: ' + href);
-                });
-        });
-    }
-    else
-    {
-        sourceError(href);
-    }
-}
-
-function downloadAudioFile(href, callback)
-{
-    if (href)
-    {
-        return fetch(href)
-            .then((resp) =>
+        fetch(href)
+            .then((response) =>
             {
-                return resp.blob();
+                return response;
             })
-            .then((blob) =>
+            .then((file) =>
             {
-                console.log('File downloaded: ' + href);
-                callback(blob);
+                cache.add(file.url);
+                console.log('File cached: ' + href);
             })
             .catch(() =>
             {
-                alert('Error while downloading file: ' + href);
+                alert('Error while caching file: ' + href);
             });
-    }
-    else
-    {
-        sourceError(href);
-    }
+    });
 }
 
+// Downloads the audio file corresponding to the URL and then calls the callback
+// Returns a Promise (so that it is possible to wait for the download to complete)
+function downloadAudioFile(href, callback)
+{
+    return fetch(href)
+        .then((resp) =>
+        {
+            return resp.blob();
+        })
+        .then((blob) =>
+        {
+            console.log('File downloaded: ' + href);
+            callback(blob);
+        })
+        .catch(() =>
+        {
+            alert('Error while downloading file: ' + href);
+        });
+}
+
+// Recursively fetches and caches the parentUL content
 function recursiveCache(parentUL)
 {
+    // Iterates over the folder content
     for (let child of parentUL.children)
     {
         let tagName = child.tagName;
 
+        // UL: recursive call
         if (tagName === 'UL')
         {
             recursiveCache(child);
         }
+        // LI: fetches and then caches the associated audio file
         else if (tagName === 'LI')
         {
+            // Audio file URL
             let href = child.getAttribute('href');
             cacheAudioFile(href);
         }
     }
 }
 
+// Recursively downloads the parentUL content and adds it to the zip
 function recursiveDownload(parentUL, parentZip, promises)
 {
+    // Current zip folder
     let name = parentUL.getAttribute('data-name');
-    console.log(name);
     let folderZip = parentZip.folder(name);
 
+    // Iterates over the folder content
     for (let child of parentUL.children)
     {
         let tagName = child.tagName;
 
+        // UL: recursive call
         if (tagName === 'UL')
         {
             recursiveDownload(child, folderZip, promises);
         }
+        // LI: downloads the associated audio file
         else if (tagName === 'LI')
         {
+            // Audio file URL
             let href = child.getAttribute('href');
 
+            // Fetches the audio file
             let promise = downloadAudioFile(href, (blob) =>
             {
+                // Adds the audio file to the zip (current folder)
                 let filename = filenameWithoutPath(href, true);
-                console.log('filename', filename);
-
-                //parentZip.file(href, blob);
-                folderZip.file(href, blob);
+                folderZip.file(filename, blob);
             });
 
+            // Used to wait for each download to complete
             promises.push(promise);
         }
     }
@@ -306,71 +322,62 @@ function triggerDownload(filename, fileData)
     a.download = filename;
     document.body.appendChild(a);
 
+    // Triggers the download
     a.click();
     window.URL.revokeObjectURL(url);
 
+    // Removes the a tag from the DOM
     document.body.removeChild(a);
 }
 
-// Alert if the file is not found
-function sourceError(href)
-{
-    alert('No source for this audio file: ' + href);
-}
-
-// Returns the filename without its path (with/out the extension)
-function filenameWithoutPath(filename, ext = false)
-{
-    let withoutPath = filename.split('/').pop();
-
-    if (ext)
-    {
-        return withoutPath;
-    }
-
-    return withoutPath.split('.').slice(0, -1).join('.');
-}
-
-// Click on download audio file
+// Click on cache-audio
 document.addEventListener('click', (evt) =>
 {
     if (evt.target && evt.target.classList.contains('cache-audio'))
     {
         evt.preventDefault();
 
+        // The audio file URL
         let href = getAudioHref(evt.target);
 
+        // Fetches and then caches the audio file
         cacheAudioFile(href);
     }
 });
 
+// Click on download-audio
 document.addEventListener('click', (evt) =>
 {
     if (evt.target && evt.target.classList.contains('download-audio'))
     {
         evt.preventDefault();
 
+        // The audio file URL
         let href = getAudioHref(evt.target);
 
+        // Fetches the audio file
         downloadAudioFile(href, (blob) =>
         {
+            // Triggers the download
             let filename = filenameWithoutPath(href, true);
-
             triggerDownload(filename, blob);
         });
     }
 });
 
+// Click on cache-folder
 document.addEventListener('click', (evt) =>
 {
     if (evt.target && evt.target.classList.contains('cache-folder'))
     {
         evt.preventDefault();
 
+        // Recursively caches the folder audio files
         recursiveCache(evt.target.parentElement);
     }
 });
 
+// Click on folder-download
 document.addEventListener('click', (evt) =>
 {
     if (evt.target && evt.target.classList.contains('download-folder'))
@@ -381,25 +388,27 @@ document.addEventListener('click', (evt) =>
         let downloadZip = new JSZip();
         let promises = [];
 
+        // Recursively downloads the folder audio files and builds a zip file
         recursiveDownload(parentUL, downloadZip, promises);
 
+        // Waits for each audio file to download
         Promise.all(promises)
             .then(() =>
             {
-                console.log(downloadZip);
-
+                // Generates the zip file
                 downloadZip.generateAsync({
                     type: 'blob',
                 })
                 .then((blob) =>
                 {
-                    console.log('trigger dl');
-                    triggerDownload('Widdles', blob);
+                    // Triggers the download
+                    let zipName = parentUL.getAttribute('data-name');
+                    triggerDownload(zipName, blob);
                 });
             })
             .catch((error) =>
             {
-                console.log(error);
+                console.log('[Recursive Download Error]', error);
             });
     }
 });
