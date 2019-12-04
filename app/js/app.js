@@ -124,8 +124,9 @@ function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder, title
         {
             zipParentFolder.file(name, value);
 
-            // File name without extension
-            let title = name.split('.').slice(0, -1).join('.');
+            // Filename without extension
+            //let title = name.split('.').slice(0, -1).join('.');
+            let title = filenameWithoutPath(name, false);
 
             htmlTree += '<li href="' + value.webkitRelativePath + '"><a href="' + value.webkitRelativePath + '" class="audio-src" data-id="' + audioFileID + '" data-title="' + title + '">' + value.name + '</a><a href="#" class="cache-audio">Cache</a><a href="#" class="download-audio">Download</a></li>';
 
@@ -136,7 +137,7 @@ function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder, title
         {
             let folderTitle = titleLevel === 1 ? ''
                 : '<h' + titleLevel + '>' + name + '</h' + titleLevel + '>';
-            htmlTree += '<ul>' + folderTitle;
+            htmlTree += '<ul data-name="' + name + '">' + folderTitle;
             htmlTree += '<a href="#" class="cache-folder">Cache</a><a href="#" class="download-folder">Download</a>';
             htmlTree += folderRecursiveBuild(value, zipParentFolder.folder(name), titleLevel + 1);
             htmlTree += '</ul>';
@@ -176,19 +177,11 @@ function generateZip(dataHtml, dataManifest)
 
     // Generates the zip file
     zipBuilder.generateAsync({
-        type: 'blob'
+        type: 'blob',
     })
-    .then((content) =>
+    .then((blob) =>
     {
-        let blobUrl = window.URL.createObjectURL(content);
-
-        let dl = document.querySelector('#dl');
-        dl.setAttribute('href', blobUrl);
-        dl.setAttribute('download', title);
-
-        // Triggers the save modal
-        dl.click();
-        window.URL.revokeObjectURL(blobUrl);
+        triggerDownload(title, blob);
     });
 }
 
@@ -212,7 +205,7 @@ function cacheAudioFile(href)
                 .then((file) =>
                 {
                     cache.add(file.url);
-                    console.log('File cached !');
+                    console.log('File cached: ' + href);
                 })
                 .catch(() =>
                 {
@@ -226,19 +219,19 @@ function cacheAudioFile(href)
     }
 }
 
-function downloadAudioFile(href)
+function downloadAudioFile(href, callback)
 {
     if (href)
     {
-        fetch(href)
+        return fetch(href)
             .then((resp) =>
             {
                 return resp.blob();
             })
             .then((blob) =>
             {
-                triggerDownload(blob, href);
-                console.log('File downloaded !');
+                console.log('File downloaded: ' + href);
+                callback(blob);
             })
             .catch(() =>
             {
@@ -251,15 +244,15 @@ function downloadAudioFile(href)
     }
 }
 
-function recursiveFiles(parent)
+function recursiveCache(parentUL)
 {
-    for (let child of parent.children)
+    for (let child of parentUL.children)
     {
         let tagName = child.tagName;
 
         if (tagName === 'UL')
         {
-            recursiveFiles(child);
+            recursiveCache(child);
         }
         else if (tagName === 'LI')
         {
@@ -269,15 +262,48 @@ function recursiveFiles(parent)
     }
 }
 
-function triggerDownload(file, href)
+function recursiveDownload(parentUL, parentZip, promises)
 {
-    const url = window.URL.createObjectURL(file);
+    let name = parentUL.getAttribute('data-name');
+    console.log(name);
+    let folderZip = parentZip.folder(name);
+
+    for (let child of parentUL.children)
+    {
+        let tagName = child.tagName;
+
+        if (tagName === 'UL')
+        {
+            recursiveDownload(child, folderZip, promises);
+        }
+        else if (tagName === 'LI')
+        {
+            let href = child.getAttribute('href');
+
+            let promise = downloadAudioFile(href, (blob) =>
+            {
+                let filename = filenameWithoutPath(href, true);
+                console.log('filename', filename);
+
+                //parentZip.file(href, blob);
+                folderZip.file(href, blob);
+            });
+
+            promises.push(promise);
+        }
+    }
+}
+
+// Triggers a download dialog for the given file
+function triggerDownload(filename, fileData)
+{
+    const url = window.URL.createObjectURL(fileData);
     const a = document.createElement('a');
 
     a.classList += 'tmp-download';
     a.style.display = 'none';
     a.href = url;
-    a.download = href.split('/').pop();
+    a.download = filename;
     document.body.appendChild(a);
 
     a.click();
@@ -286,9 +312,23 @@ function triggerDownload(file, href)
     document.body.removeChild(a);
 }
 
+// Alert if the file is not found
 function sourceError(href)
 {
     alert('No source for this audio file: ' + href);
+}
+
+// Returns the filename without its path (with/out the extension)
+function filenameWithoutPath(filename, ext = false)
+{
+    let withoutPath = filename.split('/').pop();
+
+    if (ext)
+    {
+        return withoutPath;
+    }
+
+    return withoutPath.split('.').slice(0, -1).join('.');
 }
 
 // Click on download audio file
@@ -312,7 +352,12 @@ document.addEventListener('click', (evt) =>
 
         let href = getAudioHref(evt.target);
 
-        downloadAudioFile(href);
+        downloadAudioFile(href, (blob) =>
+        {
+            let filename = filenameWithoutPath(href, true);
+
+            triggerDownload(filename, blob);
+        });
     }
 });
 
@@ -322,7 +367,7 @@ document.addEventListener('click', (evt) =>
     {
         evt.preventDefault();
 
-        recursiveFiles(evt.target.parentElement);
+        recursiveCache(evt.target.parentElement);
     }
 });
 
@@ -332,6 +377,29 @@ document.addEventListener('click', (evt) =>
     {
         evt.preventDefault();
 
-        console.log(evt.target);
+        let parentUL = evt.target.parentElement;
+        let downloadZip = new JSZip();
+        let promises = [];
+
+        recursiveDownload(parentUL, downloadZip, promises);
+
+        Promise.all(promises)
+            .then(() =>
+            {
+                console.log(downloadZip);
+
+                downloadZip.generateAsync({
+                    type: 'blob',
+                })
+                .then((blob) =>
+                {
+                    console.log('trigger dl');
+                    triggerDownload('Widdles', blob);
+                });
+            })
+            .catch((error) =>
+            {
+                console.log(error);
+            });
     }
 });
