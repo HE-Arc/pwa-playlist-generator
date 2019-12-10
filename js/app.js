@@ -28,6 +28,7 @@ document.querySelector('input#input-pwa-root-folder').addEventListener('change',
     let filesTree = buildFilesTree(files);
 
     // Builds the HTML tree based on the tree structure
+    audioFileID = 1;
     audioTree = folderRecursiveBuild(filesTree);
 
     // Displays the HTML tree structure
@@ -60,7 +61,7 @@ document.querySelector('#btn-pwa-generate').addEventListener('click', (evt) =>
         icon: 'icon.png',   //FIXME
     };
 
-    generateZip(dataHtml, dataManifest);
+    generatePWAZip(dataHtml, dataManifest);
 });
 
 // Builds a tree structure with the uploaded files
@@ -109,7 +110,7 @@ function buildFilesTree(filesList)
 }
 
 // Value incremented for each audio file
-let audioFileID = 1;
+let audioFileID;
 
 //
 function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder, titleLevel = 1)
@@ -147,43 +148,80 @@ function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder, title
     return htmlTree;
 }
 
-// Generates the PWA in a zip file
-function generateZip(dataHtml, dataManifest)
+function downloadFileAndZip(href, zipFolder, promises)
 {
+    let promise = downloadFile(href, (blob) =>
+    {
+        let filename = filenameWithoutPath(href, true);
+        zipFolder.file(filename, blob);
+    });
+
+    promises.push(promise);
+}
+
+function downloadFromArrayAndZip(files, zipFolder, promises)
+{
+    for (let href of files)
+    {
+        downloadFileAndZip(href, zipFolder, promises);
+    }
+}
+
+// Generates the PWA in a zip file
+function generatePWAZip(dataHtml, dataManifest)
+{
+    // Application folders
+    let cssFolder = zipBuilder.folder('css');
+    let jsFolder = zipBuilder.folder('js');
+
+    // Files from templates
     let html = template_html(dataHtml);
-    let appCss = template_css();
-    let appJs = template_app_js();
-    let pwaJs = template_pwa_js();
-    let serviceWorkerJs = template_service_worker();
     let manifest = template_manifest(dataManifest);
 
-    // index
+    // Files to download
+    let promises = [];
+
+    let cssFilesToDownload = [
+        //'css/app.css',
+    ];
+
+    let jsFilesToDownload = [
+        //'js/service-worker.js',
+        //'js/pwa.js',
+        'js/audio.js',
+        'js/jszip.js',
+    ];
+
+    // Files into root folder
     zipBuilder.file('index.html', html);
-
-    // css folder
-    let css = zipBuilder.folder('css');
-    css.file('app.css', appCss);
-
-    // js folder
-    let js = zipBuilder.folder('js');
-    js.file('app.js', appJs);
-
-    // PWA files
     zipBuilder.file('manifest.json', manifest);
     zipBuilder.file('icon.png', iconImg, {base64: true});
-    //FIXME: Keep it that way ? Or in js dir with relative path ?
-    zipBuilder.file('service-worker.js', serviceWorkerJs);
-    zipBuilder.file('pwa.js', pwaJs);
 
-    // Generates the zip file
-    zipBuilder.generateAsync({
-        type: 'blob',
-    })
-    .then((blob) =>
-    {
-        // Triggers the download
-        triggerDownload(title, blob);
-    });
+    // FIXME: issue #17
+    downloadFileAndZip('service-worker.js', zipBuilder, promises);
+    downloadFileAndZip('pwa.js', zipBuilder, promises);
+
+    downloadFromArrayAndZip(cssFilesToDownload, cssFolder, promises);
+    downloadFromArrayAndZip(jsFilesToDownload, jsFolder, promises);
+
+    // Waits for each audio file to download
+    Promise.all(promises)
+        .then(() =>
+        {
+            // Generates the zip file
+            zipBuilder.generateAsync({
+                type: 'blob',
+            })
+            .then((blob) =>
+            {
+                // Triggers the download
+                triggerDownload(title, blob);
+            });
+        })
+        .catch((error) =>
+        {
+            alert('[Recursive Download Error]', error);
+        });
 }
 
 // Returns the filename without its path and with/out the extension
@@ -232,7 +270,7 @@ function cacheAudioFile(href)
 
 // Downloads the audio file corresponding to the URL and then calls the callback
 // Returns a Promise (so that it is possible to wait for the download to complete)
-function downloadAudioFile(href, callback)
+function downloadFile(href, callback)
 {
     return fetch(href)
         .then((resp) =>
@@ -297,7 +335,7 @@ function recursiveDownload(parentUL, parentZip, promises)
             let href = child.getAttribute('href');
 
             // Fetches the audio file
-            let promise = downloadAudioFile(href, (blob) =>
+            let promise = downloadFile(href, (blob) =>
             {
                 // Adds the audio file to the zip (current folder)
                 let filename = filenameWithoutPath(href, true);
@@ -356,7 +394,7 @@ document.addEventListener('click', (evt) =>
         let href = getAudioHref(evt.target);
 
         // Fetches the audio file
-        downloadAudioFile(href, (blob) =>
+        downloadFile(href, (blob) =>
         {
             // Triggers the download
             let filename = filenameWithoutPath(href, true);
@@ -408,7 +446,7 @@ document.addEventListener('click', (evt) =>
             })
             .catch((error) =>
             {
-                console.log('[Recursive Download Error]', error);
+                alert('[Recursive Download Error]', error);
             });
     }
 });
