@@ -1,9 +1,10 @@
+
 'use strict';
 
-const $$ = {
-    audioPlayer: document.querySelector('#audio-player'),
-    audioTree: document.querySelector('#audio-tree'),
-    audioFileRepeat: document.querySelector('#audio-repeat'),
+const $$_audio = {
+    player: document.querySelector('#audio-player'),
+    tree: document.querySelector('#audio-tree'),
+    fileRepeat: document.querySelector('#audio-repeat'),
 };
 
 // Audio player actions enum
@@ -18,7 +19,7 @@ const AudioPlayerActions = Object.freeze(
 
 const PLAYER_REWIND_TIME = 3;
 
-const TOTAL_AUDIO_FILES = $$.audioTree.getElementsByClassName('audio-src').length;
+const TOTAL_AUDIO_FILES = $$_audio.tree.getElementsByClassName('audio-src').length;
 let isRandom = false;
 let randomQueue = [];
 let randomHistory = [];
@@ -35,7 +36,7 @@ function getCurrentAudioFileId()
 // Sets the current audio file corresponding to the given id
 function setNextAudioFileById(id)
 {
-    let nextAudioFile = $$.audioTree.querySelector('.audio-src[data-id="' + id + '"]');
+    let nextAudioFile = $$_audio.tree.querySelector('.audio-src[data-id="' + id + '"]');
 
     // There is a next audio file to play
     if (nextAudioFile !== null)
@@ -93,9 +94,9 @@ function playCurrentAudioFile()
     {
         displayCurrentAudioFile();
 
-        $$.audioPlayer.setAttribute('src', currentAudioFile.getAttribute('href'));
+        $$_audio.player.setAttribute('src', currentAudioFile.getAttribute('href'));
         //FIXME: there could be download erros ; maybe use a promise to handle the case
-        $$.audioPlayer.play();
+        $$_audio.player.play();
     }
     //FIXME: no need for this block if using a promise
     else
@@ -134,9 +135,9 @@ document.querySelector('#audio-next').addEventListener('click', (evt) =>
 document.querySelector('#audio-previous').addEventListener('click', (evt) =>
 {
     // Rewinds audio file
-    if ($$.audioPlayer.currentTime > PLAYER_REWIND_TIME)
+    if ($$_audio.player.currentTime > PLAYER_REWIND_TIME)
     {
-        $$.audioPlayer.currentTime = 0;
+        $$_audio.player.currentTime = 0;
     }
     // Plays previous audio file
     else
@@ -199,14 +200,14 @@ document.querySelector('#audio-random').addEventListener('click', (evt) =>
 });
 
 // On ended audio player
-$$.audioPlayer.addEventListener('ended', (evt) =>
+$$_audio.player.addEventListener('ended', (evt) =>
 {
     // Repeats the current audio file
-    if ($$.audioFileRepeat.checked && !currentAudioFileRepeated)
+    if ($$_audio.fileRepeat.checked && !currentAudioFileRepeated)
     {
         currentAudioFileRepeated = true;
-        $$.audioPlayer.currentTime = 0;
-        $$.audioPlayer.play();
+        $$_audio.player.currentTime = 0;
+        $$_audio.player.play();
     }
     else
     {
@@ -219,36 +220,6 @@ $$.audioPlayer.addEventListener('ended', (evt) =>
         else
         {
             playNextAudioFile(AudioPlayerActions.NEXT);
-        }
-    }
-});
-
-// Click on download audio file
-document.addEventListener('click', (evt) =>
-{
-    if (evt.target && evt.target.classList.contains('cache-audio'))
-    {
-        evt.preventDefault();
-
-        let audioFile = evt.target.getAttribute('href');
-
-        // Caches the audio file for offline listening
-        if (audioFile)
-        {
-            caches.open('audio-cache').then((cache) =>
-            {
-                fetch(audioFile).then((response) =>
-                {
-                    return response;
-                }).then((file) =>
-                {
-                    cache.add(file.url);
-                });
-            });
-        }
-        else
-        {
-            alert('No source file for this audio file.');
         }
     }
 });

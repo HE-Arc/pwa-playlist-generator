@@ -30,8 +30,9 @@ function template_html(data)
 
             <script src="service-worker.js"></script>
             <script src="pwa.js"></script>
-            <script src="js/audio.js"></script>
+            <script src="js/pwa-audio.js"></script>
             <script src="js/jszip.js"></script>
+            <script src="js/common.js"></script>
 
         </body>
     </html>
