@@ -26,7 +26,7 @@ function getAudioHref(element)
 function cacheAudioFile(href)
 {
     // Caches the audio file for offline listening
-    caches.open('audio-cache').then((cache) =>
+    caches.open(AUDIO_CACHE_NAME).then((cache) =>
     {
         fetch(href)
             .then((response) =>
