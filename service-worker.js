@@ -2,15 +2,14 @@
 'use strict';
 
 // Update cache names any time any of the cached files change.
-const STATIC_CACHE_NAME = 'static-cache-v1.4';
-const AUDIO_CACHE_NAME = 'audio-cache-v1';
+const STATIC_CACHE_NAME = 'static-cache-v1.0';
+const AUDIO_CACHE_NAME = 'audio-cache-v1.0';
 
 // Add list of files to cache here.
 const FILES_TO_CACHE = [
     'index.html',
     'pwa.js',
     'service-worker.js',
-    'icon.png',
     'js/common.js',
     'js/jszip.js',
     'js/pwa-audio.js',

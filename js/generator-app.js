@@ -145,6 +145,8 @@ function generatePWAZip(dataHtml, dataManifest)
     // Files into root folder
     zipBuilder.file('index.html', html);
     zipBuilder.file('manifest.json', manifest);
+
+    //FIXME: CORRECT PATH
     zipBuilder.file('icon.png', iconImg, {base64: true});
 
     // FIXME: issue #17
@@ -218,14 +220,18 @@ document.querySelector('#btn-pwa-generate').addEventListener('click', (evt) =>
     evt.preventDefault();
 
     const dataHtml = {
+        lang: 'en',     //FIXME
+        description: 'This is the app description...',  //FIXME
         title: title,
         audioTree: audioTree,
+        theme_color: '#2F3BA2',         //FIXME
     };
 
     const dataManifest = {
         name: title,
         shortname: title,
-        icon: 'icon.png',   //FIXME
+        background_color: '#3E4EB8',    //FIXME
+        theme_color: '#2F3BA2',         //FIXME
     };
 
     generatePWAZip(dataHtml, dataManifest);

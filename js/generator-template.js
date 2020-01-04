@@ -4,13 +4,16 @@ function template_html(data)
 {
     return `
     <!DOCTYPE html>
-    <html>
+    <html lang="${data.lang}">
         <head>
             <meta charset="utf-8">
             <title>${data.title}</title>
+            <meta name="description" content="${data.description}">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <link rel="manifest" href="manifest.json">
-            <!--link rel="stylesheet" href="css/app.css"-->
+            <meta name="theme-color" content="${data.theme_color}">
+            <!-- MUST BE 192px SQUARE (OR 180px) -->
+            <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
         </head>
         <body>
             <div class="container">
@@ -44,17 +47,24 @@ function template_manifest(data)
 {
     return `
 {
-  "name": "${data.name}",
-  "short_name": "${data.shortname}",
-  "icons": [{
-      "src": "${data.icon}",
-      "sizes": "144x144",
-      "type": "image/png"
-    }],
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#3E4EB8",
-  "theme_color": "#2F3BA2"
+    "name": "${data.name}",
+    "short_name": "${data.shortname}",
+    "icons": [
+        {
+        "src": "images/icons/icon-512x512.png",
+        "sizes": "192x192",
+        "type": "image/png"
+        },
+        {
+        "src": "images/icons/icon-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+        }
+    ],
+    "start_url": "index.html",
+    "display": "standalone",
+    "background_color": "${data.background_color}",
+    "theme_color": "${data.theme_color}"
 }
     `;
 }
