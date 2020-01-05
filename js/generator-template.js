@@ -51,14 +51,14 @@ function template_manifest(data)
     "short_name": "${data.shortname}",
     "icons": [
         {
-        "src": "images/icons/icon-512x512.png",
-        "sizes": "192x192",
-        "type": "image/png"
+            "src": "images/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
         },
         {
-        "src": "images/icons/icon-512x512.png",
-        "sizes": "512x512",
-        "type": "image/png"
+            "src": "images/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
         }
     ],
     "start_url": "index.html",

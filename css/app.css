@@ -1,6 +1,12 @@
 
-input {
-    color: #fff;
+/* label color */
+.input-field label {
+    color: #aaa;
+}
+/* label focus color */
+.input-field input,
+.input-field textarea {
+    color: #f5f5f5;
 }
 .input-field {
     margin: 0;

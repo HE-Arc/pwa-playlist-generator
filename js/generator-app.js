@@ -2,8 +2,12 @@
 'use strict';
 
 let title = 'PWA Playlist Generator';
+let shortname = 'Generator';
+let description = 'Powered by PWA Playlist Generator';
 let audioTree = '';
-let iconImg = '';
+//let iconImg = '';
+let icon192 = '';
+let icon512 = '';
 
 let zipBuilder = new JSZip();
 
@@ -120,6 +124,8 @@ function generatePWAZip(dataHtml, dataManifest)
     // Application folders
     let cssFolder = zipBuilder.folder('css');
     let jsFolder = zipBuilder.folder('js');
+    let imgFolder = zipBuilder.folder('images');
+    let iconFolder = imgFolder.folder('icons');
 
     // Files from templates
     let html = template_html(dataHtml);
@@ -147,7 +153,9 @@ function generatePWAZip(dataHtml, dataManifest)
     zipBuilder.file('manifest.json', manifest);
 
     //FIXME: CORRECT PATH
-    zipBuilder.file('icon.png', iconImg, {base64: true});
+    //zipBuilder.file('icon.png', iconImg, {base64: true});
+    iconFolder.file('icon-192x192.png', icon192, { base64: true });
+    iconFolder.file('icon-512x512.png', icon512, { base64: true });
 
     // FIXME: issue #17
     downloadFileAndZip('service-worker.js', zipBuilder, promises);
@@ -183,14 +191,26 @@ document.addEventListener('DOMContentLoaded', () =>
     M.FormSelect.init(document.querySelector('select'), { /* options */ });
 });
 
-// Title input on input event
-document.querySelector('input#input-pwa-title').addEventListener('input', (evt) =>
+// Title input on change event
+document.querySelector('#input-pwa-title').addEventListener('change', (evt) =>
 {
     title = evt.target.value;
 });
 
+// Shortname input on change event
+document.querySelector('#input-pwa-shortname').addEventListener('change', (evt) =>
+{
+    shortname = evt.target.value;
+});
+
+// Description input on change event
+document.querySelector('#input-pwa-description').addEventListener('change', (evt) =>
+{
+    description = evt.target.value;
+});
+
 // Root folder input on change event
-document.querySelector('input#input-pwa-root-folder').addEventListener('change', (evt) =>
+document.querySelector('#input-pwa-root-folder').addEventListener('change', (evt) =>
 {
     let files = evt.target.files;
     // Builds a tree structure with the uploaded files
@@ -205,6 +225,7 @@ document.querySelector('input#input-pwa-root-folder').addEventListener('change',
 });
 
 // Icon input on change event
+/*
 document.querySelector('input#input-pwa-icon').addEventListener('change', (evt) =>
 {
     iconImg = evt.target.files[0];
@@ -212,6 +233,19 @@ document.querySelector('input#input-pwa-icon').addEventListener('change', (evt) 
     // Displays the uploaded icon
     let uploadedIcon = document.querySelector('#uploaded-icon');
     uploadedIcon.src = URL.createObjectURL(evt.target.files[0]);
+});
+*/
+
+// Icon192 input on change event
+document.querySelector('#input-icon192').addEventListener('change', (evt) =>
+{
+    icon192 = evt.target.files[0];
+});
+
+// Icon512 input on change event
+document.querySelector('#input-icon512').addEventListener('change', (evt) =>
+{
+    icon512 = evt.target.files[0];
 });
 
 // Click on the Generate HTML button
@@ -221,7 +255,7 @@ document.querySelector('#btn-pwa-generate').addEventListener('click', (evt) =>
 
     const dataHtml = {
         lang: 'en',     //FIXME
-        description: 'This is the app description...',  //FIXME
+        description: description,
         title: title,
         audioTree: audioTree,
         theme_color: '#2F3BA2',         //FIXME
@@ -229,7 +263,7 @@ document.querySelector('#btn-pwa-generate').addEventListener('click', (evt) =>
 
     const dataManifest = {
         name: title,
-        shortname: title,
+        shortname: shortname,
         background_color: '#3E4EB8',    //FIXME
         theme_color: '#2F3BA2',         //FIXME
     };
