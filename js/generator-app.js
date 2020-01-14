@@ -72,7 +72,7 @@ function buildFilesTree(filesList)
             for (let f = 0; f < fileParents.length; f++)
             {
                 // This folder is not in the files tree yet
-                if (!currentFolder.has(fileParents[f]))
+                if (! currentFolder.has(fileParents[f]))
                 {
                     currentFolder.set(fileParents[f], new Map());
                 }
@@ -111,22 +111,20 @@ function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder, title
             zipParentFolder.file(name, value);
 
             // Filename without extension
-            //let title = name.split('.').slice(0, -1).join('.');
             let title = filenameWithoutPath(name, false);
+            let webkitRelativePath = value.webkitRelativePath;
 
-            htmlTree += '<li class="audio-file" href="' + value.webkitRelativePath + '"><a href="' + value.webkitRelativePath + '" class="audio-src" data-id="' + audioFileID + '" data-title="' + title + '">' + value.name + '</a><a href="#" class="cache-audio">Cache</a><a href="#" class="download-audio">Download</a></li>';
+            htmlTree += theme_none_tree_file(name, title, webkitRelativePath, audioFileID);
 
             ++audioFileID;
         }
         // Folder
         else
         {
-            let folderTitle = titleLevel === 1 ? ''
-                : '<h' + titleLevel + ' class="audio-folder-title">' + name + '</h' + titleLevel + '>';
-            htmlTree += '<ul data-name="' + name + '"><li class="audio-folder">' + folderTitle;
-            htmlTree += '<a href="#" class="cache-folder">Cache</a><a href="#" class="download-folder">Download</a></li>';
-            htmlTree += folderRecursiveBuild(value, zipParentFolder.folder(name), titleLevel + 1);
-            htmlTree += '</ul>';
+            let folderTitle = `<h${titleLevel} class="audio-folder-title">${name}</h${titleLevel}>`;
+            let folderContent = folderRecursiveBuild(value, zipParentFolder.folder(name), titleLevel + 1);
+
+            htmlTree += theme_none_tree_folder(name, folderTitle, folderContent, titleLevel);
         }
     }
 
@@ -167,27 +165,10 @@ function generatePWAZip(dataHtml, dataManifest)
 
     // Files from templates
     let html = window[theme](dataHtml);
-    //let html = template_html(dataHtml);
     let manifest = template_manifest(dataManifest);
 
     // Files to download
     let promises = [];
-
-    /*
-    let cssFilesToDownload = [
-        //FIXME: templates
-        //'css/app.css',
-    ];
-
-    let jsFilesToDownload = [
-        //FIXME: see issue #17
-        //'js/service-worker.js',
-        //'js/pwa.js',
-        'js/pwa-audio.js',
-        'js/jszip.js',
-        'js/common.js',
-    ];
-    */
 
     // Files into root folder
     zipBuilder.file('index.html', html);
@@ -229,6 +210,8 @@ document.addEventListener('DOMContentLoaded', () =>
 {
     // Materialize Select
     const selectTheme = M.FormSelect.init(document.querySelector('select'), { /* options */ });
+
+    // Theme select on change event
     selectTheme.el.addEventListener('change', (evt) =>
     {
         theme = evt.target.value;
@@ -267,18 +250,6 @@ document.querySelector('#input-pwa-root-folder').addEventListener('change', (evt
     // Displays the HTML tree structure
     document.querySelector('#audio-tree').innerHTML = audioTree;
 });
-
-// Icon input on change event
-/*
-document.querySelector('input#input-pwa-icon').addEventListener('change', (evt) =>
-{
-    iconImg = evt.target.files[0];
-
-    // Displays the uploaded icon
-    let uploadedIcon = document.querySelector('#uploaded-icon');
-    uploadedIcon.src = URL.createObjectURL(evt.target.files[0]);
-});
-*/
 
 // Icon192 input on change event
 document.querySelector('#input-icon192').addEventListener('change', (evt) =>
