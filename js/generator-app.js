@@ -9,6 +9,44 @@ let audioTree = '';
 let icon192 = '';
 let icon512 = '';
 
+let theme = 'theme_none';
+const THEME_ASSETS = {
+    theme_none: {
+        css: [
+            // No CSS
+        ],
+        js: [
+            'js/pwa-audio.js',
+            'js/jszip.js',
+            'js/common.js',
+        ],
+    },
+    theme_materialize_light: {
+        css: [
+            'css/materialize.min.css',
+            'css/theme_materialize_light.css',
+        ],
+        js: [
+            'js/pwa-audio.js',
+            'js/jszip.js',
+            'js/common.js',
+            'js/materialize.min.js',
+        ],
+    },
+    theme_materialize_dark: {
+        css: [
+            'css/materialize.min.css',
+            'css/theme_materialize_dark.css',
+        ],
+        js: [
+            'js/pwa-audio.js',
+            'js/jszip.js',
+            'js/common.js',
+            'js/materialize.min.js',
+        ],
+    },
+};
+
 let zipBuilder = new JSZip();
 
 // Builds a tree structure with the uploaded files
@@ -76,7 +114,7 @@ function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder, title
             //let title = name.split('.').slice(0, -1).join('.');
             let title = filenameWithoutPath(name, false);
 
-            htmlTree += '<li href="' + value.webkitRelativePath + '"><a href="' + value.webkitRelativePath + '" class="audio-src" data-id="' + audioFileID + '" data-title="' + title + '">' + value.name + '</a><a href="#" class="cache-audio">Cache</a><a href="#" class="download-audio">Download</a></li>';
+            htmlTree += '<li class="audio-file" href="' + value.webkitRelativePath + '"><a href="' + value.webkitRelativePath + '" class="audio-src" data-id="' + audioFileID + '" data-title="' + title + '">' + value.name + '</a><a href="#" class="cache-audio">Cache</a><a href="#" class="download-audio">Download</a></li>';
 
             ++audioFileID;
         }
@@ -84,9 +122,9 @@ function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder, title
         else
         {
             let folderTitle = titleLevel === 1 ? ''
-                : '<h' + titleLevel + '>' + name + '</h' + titleLevel + '>';
-            htmlTree += '<ul data-name="' + name + '">' + folderTitle;
-            htmlTree += '<a href="#" class="cache-folder">Cache</a><a href="#" class="download-folder">Download</a>';
+                : '<h' + titleLevel + ' class="audio-folder-title">' + name + '</h' + titleLevel + '>';
+            htmlTree += '<ul data-name="' + name + '"><li class="audio-folder">' + folderTitle;
+            htmlTree += '<a href="#" class="cache-folder">Cache</a><a href="#" class="download-folder">Download</a></li>';
             htmlTree += folderRecursiveBuild(value, zipParentFolder.folder(name), titleLevel + 1);
             htmlTree += '</ul>';
         }
@@ -128,12 +166,14 @@ function generatePWAZip(dataHtml, dataManifest)
     let iconFolder = imgFolder.folder('icons');
 
     // Files from templates
-    let html = template_html(dataHtml);
+    let html = window[theme](dataHtml);
+    //let html = template_html(dataHtml);
     let manifest = template_manifest(dataManifest);
 
     // Files to download
     let promises = [];
 
+    /*
     let cssFilesToDownload = [
         //FIXME: templates
         //'css/app.css',
@@ -147,6 +187,7 @@ function generatePWAZip(dataHtml, dataManifest)
         'js/jszip.js',
         'js/common.js',
     ];
+    */
 
     // Files into root folder
     zipBuilder.file('index.html', html);
@@ -157,12 +198,11 @@ function generatePWAZip(dataHtml, dataManifest)
     iconFolder.file('icon-192x192.png', icon192, { base64: true });
     iconFolder.file('icon-512x512.png', icon512, { base64: true });
 
-    // FIXME: issue #17
     downloadFileAndZip('service-worker.js', zipBuilder, promises);
     downloadFileAndZip('pwa.js', zipBuilder, promises);
 
-    downloadFromArrayAndZip(cssFilesToDownload, cssFolder, promises);
-    downloadFromArrayAndZip(jsFilesToDownload, jsFolder, promises);
+    downloadFromArrayAndZip(THEME_ASSETS[theme]['css'], cssFolder, promises);
+    downloadFromArrayAndZip(THEME_ASSETS[theme]['js'], jsFolder, promises);
 
     // Waits for each file to download
     Promise.all(promises)
@@ -188,7 +228,11 @@ function generatePWAZip(dataHtml, dataManifest)
 document.addEventListener('DOMContentLoaded', () =>
 {
     // Materialize Select
-    M.FormSelect.init(document.querySelector('select'), { /* options */ });
+    const selectTheme = M.FormSelect.init(document.querySelector('select'), { /* options */ });
+    selectTheme.el.addEventListener('change', (evt) =>
+    {
+        theme = evt.target.value;
+    });
 });
 
 // Title input on change event
