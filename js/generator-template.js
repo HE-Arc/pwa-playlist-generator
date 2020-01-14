@@ -156,10 +156,76 @@ function theme_materialize_light(data)
     `;
 }
 
+function theme_materialize_light_tree_folder(name, folderTitle, folderContent, titleLevel)
+{
+    let htmlFolder = titleLevel === 1 ?
+        '' : '<li class="folder-subfolder">';
+
+    htmlFolder += `
+<ul data-name="${name}">
+    <li class="audio-folder">${folderTitle}
+        <a href="#" class="cache-folder"><i class="material-icons">cached</i></a>
+        <a href="#" class="download-folder"><i class="material-icons">file_download</i></a>
+    </li>
+    ${folderContent}
+</ul>
+    `
+    if (titleLevel > 1)
+    {
+        htmlFolder += '</li>';
+    }
+
+    return htmlFolder;
+}
+
+function theme_materialize_light_tree_file(name, title, webkitRelativePath, audioFileID)
+{
+    return `
+<li class="audio-file" href="${webkitRelativePath}">
+    <a href="${webkitRelativePath}" class="audio-src" data-id="${audioFileID}" data-title="${title}">${name}</a>
+    <a href="#" class="cache-audio"><i class="material-icons">cached</i></a>
+    <a href="#" class="download-audio"><i class="material-icons">file_download</i></a>
+</li>
+    `;
+}
+
 function theme_materialize_dark(data)
 {
     return `
 
+    `;
+}
+
+function theme_materialize_dark_tree_folder(name, folderTitle, folderContent, titleLevel)
+{
+    let htmlFolder = titleLevel === 1 ?
+        '' : '<li class="folder-subfolder">';
+
+    htmlFolder += `
+<ul data-name="${name}">
+    <li class="audio-folder">${folderTitle}
+        <a href="#" class="cache-folder"><i class="material-icons">cached</i></a>
+        <a href="#" class="download-folder"><i class="material-icons">file_download</i></a>
+    </li>
+    ${folderContent}
+</ul>
+    `
+    if (titleLevel > 1)
+    {
+        htmlFolder += '</li>';
+    }
+
+    return htmlFolder;
+}
+
+function theme_materialize_dark_tree_file(name, title, webkitRelativePath, audioFileID)
+{
+    return `
+<li class="audio-file" href="${webkitRelativePath}">
+    <a href="${webkitRelativePath}" class="audio-src" data-id="${audioFileID}" data-title="${title}">${name}</a>
+    <a href="#" class="cache-audio"><i class="material-icons">cached</i></a>
+    <a href="#" class="download-audio"><i class="material-icons">file_download</i></a>
+</li>
     `;
 }
 

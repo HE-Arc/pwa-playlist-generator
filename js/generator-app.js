@@ -5,12 +5,11 @@ let title = 'PWA Playlist Generator';
 let shortname = 'Generator';
 let description = 'Powered by PWA Playlist Generator';
 let audioTree = '';
-//let iconImg = '';
 let icon192 = '';
 let icon512 = '';
 
 let theme = 'theme_none';
-const THEME_ASSETS = {
+const THEME_OPTIONS = {
     theme_none: {
         css: [
             // No CSS
@@ -113,18 +112,22 @@ function folderRecursiveBuild(currentFolder, zipParentFolder = zipBuilder, title
             // Filename without extension
             let title = filenameWithoutPath(name, false);
             let webkitRelativePath = value.webkitRelativePath;
+            let themeFile = theme + '_tree_file';
 
-            htmlTree += theme_none_tree_file(name, title, webkitRelativePath, audioFileID);
+            htmlTree += window[themeFile](name, title, webkitRelativePath, audioFileID);
 
             ++audioFileID;
         }
         // Folder
         else
         {
-            let folderTitle = `<h${titleLevel} class="audio-folder-title">${name}</h${titleLevel}>`;
+            let folderTitle = titleLevel === 1 ?
+                '' : `<h${titleLevel} class="audio-folder-title">${name}</h${titleLevel}>`;
             let folderContent = folderRecursiveBuild(value, zipParentFolder.folder(name), titleLevel + 1);
+            let themeFolder = theme + '_tree_folder';
 
-            htmlTree += theme_none_tree_folder(name, folderTitle, folderContent, titleLevel);
+            // FIXME: ul > ul ; problem here ? ()
+            htmlTree += window[themeFolder](name, folderTitle, folderContent, titleLevel);
         }
     }
 
@@ -182,8 +185,8 @@ function generatePWAZip(dataHtml, dataManifest)
     downloadFileAndZip('service-worker.js', zipBuilder, promises);
     downloadFileAndZip('pwa.js', zipBuilder, promises);
 
-    downloadFromArrayAndZip(THEME_ASSETS[theme]['css'], cssFolder, promises);
-    downloadFromArrayAndZip(THEME_ASSETS[theme]['js'], jsFolder, promises);
+    downloadFromArrayAndZip(THEME_OPTIONS[theme]['css'], cssFolder, promises);
+    downloadFromArrayAndZip(THEME_OPTIONS[theme]['js'], jsFolder, promises);
 
     // Waits for each file to download
     Promise.all(promises)
