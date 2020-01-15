@@ -1,10 +1,16 @@
 
 'use strict';
 
+/**
+ * Application form values for generation
+ */
+
+let filesMap = new Map();
+let audioTree = '';
+
 let title = 'PWA Playlist Generator';
 let shortname = 'Generator';
 let description = 'Powered by PWA Playlist Generator';
-let audioTree = '';
 let icon192 = '';
 let icon512 = '';
 
@@ -49,9 +55,9 @@ const THEME_OPTIONS = {
 let zipBuilder = new JSZip();
 
 // Builds a tree structure with the uploaded files
-function buildFilesTree(filesList)
+function buildFilesMap(filesList)
 {
-    let filesTree = new Map();
+    let filesMapBuilder = new Map();
 
     // Iterates over each uploaded file
     for (let i = 0; i < filesList.length; i++)
@@ -65,7 +71,7 @@ function buildFilesTree(filesList)
             let relativePath = file.webkitRelativePath;
             // This file parent folders (array)
             let fileParents = relativePath.split('/').slice(0, -1);
-            let currentFolder = filesTree;
+            let currentFolder = filesMapBuilder;
 
             // Iterates over each parent folder of the current file
             for (let f = 0; f < fileParents.length; f++)
@@ -85,12 +91,12 @@ function buildFilesTree(filesList)
     }
 
     // Default application title is the root folder name
-    title = filesTree.keys().next().value;;
+    title = filesMapBuilder.keys().next().value;
     document.querySelector('#input-pwa-title').value = title;
     // Triggers the input animation (materialize)
     document.querySelector('label[for="input-pwa-title"]').classList += 'active';
 
-    return filesTree;
+    return filesMapBuilder;
 }
 
 // Value incremented for each audio file
@@ -244,14 +250,10 @@ document.querySelector('#input-pwa-root-folder').addEventListener('change', (evt
 {
     let files = evt.target.files;
     // Builds a tree structure with the uploaded files
-    let filesTree = buildFilesTree(files);
-
-    // Builds the HTML tree based on the tree structure
-    audioFileID = 1;
-    audioTree = folderRecursiveBuild(filesTree);
+    filesMap = buildFilesMap(files);
 
     // Displays the HTML tree structure
-    document.querySelector('#audio-tree').innerHTML = audioTree;
+    //document.querySelector('#audio-tree').innerHTML = audioTree;
 });
 
 // Icon192 input on change event
@@ -270,6 +272,10 @@ document.querySelector('#input-icon512').addEventListener('change', (evt) =>
 document.querySelector('#btn-pwa-generate').addEventListener('click', (evt) =>
 {
     evt.preventDefault();
+
+    // Builds the HTML tree based on the tree structure
+    audioFileID = 1;
+    audioTree = folderRecursiveBuild(filesMap);
 
     const dataHtml = {
         lang: 'en',     //FIXME
