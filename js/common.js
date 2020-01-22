@@ -65,21 +65,30 @@ function downloadFile(href, callback)
         });
 }
 
+// Returns the first UL tag found from the element parents
+function findParentUL(element)
+{
+	while (element.tagName !== 'UL')
+	{
+		element = element.parentElement;
+	}
+
+	return element;
+}
+
 // Recursively fetches and caches the parentUL content
 function recursiveCache(parentUL)
 {
     // Iterates over the folder content
     for (let child of parentUL.children)
     {
-        let tagName = child.tagName;
-
-        // UL: recursive call
-        if (tagName === 'UL')
+        // Folder: recursive call
+        if (child.classList.contains('folder-subfolder'))
         {
-            recursiveCache(child);
+            recursiveCache(child.children[0]);
         }
-        // LI: fetches and then caches the associated audio file
-        else if (tagName === 'LI')
+        // File: fetches and then caches the associated audio file
+        else if (child.classList.contains('audio-file'))
         {
             // Audio file URL
             let href = child.getAttribute('href');
@@ -98,15 +107,13 @@ function recursiveDownload(parentUL, parentZip, promises)
     // Iterates over the folder content
     for (let child of parentUL.children)
     {
-        let tagName = child.tagName;
-
-        // UL: recursive call
-        if (tagName === 'UL')
+        // Folder: recursive call
+        if (child.classList.contains('folder-subfolder'))
         {
-            recursiveDownload(child, folderZip, promises);
+            recursiveDownload(child.children[0], folderZip, promises);
         }
-        // LI: downloads the associated audio file
-        else if (tagName === 'LI')
+        // File: downloads the associated audio file
+        else if (child.classList.contains('audio-file'))
         {
             // Audio file URL
             let href = child.getAttribute('href');
@@ -146,29 +153,29 @@ function triggerDownload(filename, fileData)
 }
 
 // Click on cache-audio
-document.addEventListener('click', (evt) =>
+document.querySelectorAll('.cache-audio').forEach(el =>
 {
-    if (evt.target && evt.target.classList.contains('cache-audio'))
-    {
-        evt.preventDefault();
+	el.addEventListener('click', (evt) =>
+	{
+	    evt.preventDefault();
 
-        // The audio file URL
-        let href = getAudioHref(evt.target);
+	    // The audio file URL
+	    let href = getAudioHref(evt.currentTarget);
 
-        // Fetches and then caches the audio file
-        cacheAudioFile(href);
-    }
+	    // Fetches and then caches the audio file
+	    cacheAudioFile(href);
+	});
 });
 
 // Click on download-audio
-document.addEventListener('click', (evt) =>
+document.querySelectorAll('.download-audio').forEach(el =>
 {
-    if (evt.target && evt.target.classList.contains('download-audio'))
+    el.addEventListener('click', (evt) =>
     {
         evt.preventDefault();
 
         // The audio file URL
-        let href = getAudioHref(evt.target);
+        let href = getAudioHref(evt.currentTarget);
 
         // Fetches the audio file
         downloadFile(href, (blob) =>
@@ -177,29 +184,29 @@ document.addEventListener('click', (evt) =>
             let filename = filenameWithoutPath(href, true);
             triggerDownload(filename, blob);
         });
-    }
+    });
 });
 
 // Click on cache-folder
-document.addEventListener('click', (evt) =>
+document.querySelectorAll('.cache-folder').forEach(el =>
 {
-    if (evt.target && evt.target.classList.contains('cache-folder'))
+    el.addEventListener('click', (evt) =>
     {
         evt.preventDefault();
 
-        // Recursively caches the folder audio files
-        recursiveCache(evt.target.parentElement);
-    }
+        //Recursively caches the folder audio files
+        recursiveCache(findParentUL(evt.currentTarget));
+    });
 });
 
 // Click on folder-download
-document.addEventListener('click', (evt) =>
+document.querySelectorAll('.download-folder').forEach(el =>
 {
-    if (evt.target && evt.target.classList.contains('download-folder'))
+    el.addEventListener('click', (evt) =>
     {
         evt.preventDefault();
 
-        let parentUL = evt.target.parentElement;
+        let parentUL = findParentUL(evt.currentTarget)
         let downloadZip = new JSZip();
         let promises = [];
 
@@ -225,5 +232,5 @@ document.addEventListener('click', (evt) =>
             {
                 alert('[Recursive Download Error]', error);
             });
-    }
+    });
 });

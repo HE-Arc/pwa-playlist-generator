@@ -1,0 +1,113 @@
+
+.header {
+    height: 40px;
+}
+
+.main {
+    padding: 3em 0;
+}
+
+.page-footer {
+    background: #333 !important;
+    color: #f5f5f5 !important;
+    font-size: 1.3em;
+    padding: 1.5em 0 12em 0 !important;
+}
+.page-footer p {
+    margin: 0.4em 0;
+}
+.page-footer a {
+    color: #ff1744;
+    transition: all 0.3s;
+}
+.page-footer a:hover {
+    color: #e91e63;
+}
+
+.main-title {
+    font-size: 3em;
+    text-align: center;
+    margin: 0 0 0.5em 0;
+}
+
+#audio-tree > ul > .audio-folder {
+    text-align: center;
+}
+
+.audio-folder .audio-folder-title {
+    font-size: 2.5em;
+    width: 75%;
+    margin: 0;
+    padding: 0.5em 0;
+    display: inline-block;
+}
+.audio-folder .cache-folder,
+.audio-folder .download-folder {
+    width: 10%;
+    padding: 0.5em 0.3em;
+    display: inline-block;
+}
+
+.audio-file {
+    background: transparent;
+    font-size: 1.2em;
+    transition: all 0.3s;
+}
+.audio-file:hover {
+    background: #555;
+}
+.audio-file.active {
+    background: #777;
+}
+.audio-file.active .audio-src,
+.audio-file.active .cache-audio,
+.audio-file.active .download-audio {
+    color: #000;
+}
+
+.audio-file .audio-src {
+    color: #ff1744;
+    width: 75%;
+    padding: 0.5em 0;
+    display: inline-block;
+}
+.audio-file .cache-audio,
+.audio-file .download-audio {
+    width: 10%;
+    padding: 0.5em 0.3em;
+    display: inline-block;
+}
+
+.cache-audio,
+.download-audio,
+.cache-folder,
+.download-folder {
+    color: #f5f5f5;
+    text-align: center;
+    background: transparent;
+    transition: all 0.3s;
+}
+.cache-audio:hover,
+.download-audio:hover,
+.cache-folder:hover,
+.download-folder:hover {
+    color: #ff5722 !important;
+    background: #555;
+}
+
+#player-container {
+    padding: 2em 0 1em 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+#player-container #player-audio {
+    display: inline-block;
+}
+#player-container #player-actions .player-action {
+    display: inline-block;
+}
+#player-container #player-actions .player-action .btn-floating {
+    border: 1px solid #000;
+}

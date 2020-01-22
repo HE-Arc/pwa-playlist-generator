@@ -95,7 +95,7 @@ function playCurrentAudioFile()
         displayCurrentAudioFile();
 
         $$_audio.player.setAttribute('src', currentAudioFile.getAttribute('href'));
-        //FIXME: there could be download erros ; maybe use a promise to handle the case
+        //FIXME: there could be download errors ; maybe use a promise to handle the case
         $$_audio.player.play();
     }
     //FIXME: no need for this block if using a promise
