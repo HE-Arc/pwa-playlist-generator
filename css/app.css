@@ -16,4 +16,14 @@ form .col {
 }
 #section-about {
     font-size: 1.3em;
+    padding-top: 30px;
+}
+
+#section-he-arc {
+    padding: 50px 0 30px 0;
+}
+#logo-he-arc {
+    width: 250px;
+    margin: 0 auto;
+    display: block;
 }
