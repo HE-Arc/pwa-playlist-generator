@@ -234,3 +234,16 @@ document.querySelectorAll('.download-folder').forEach(el =>
             });
     });
 });
+
+document.addEventListener("DOMContentLoaded", function() 
+{
+    playNthAudio();
+});
+
+function playNthAudio() 
+{
+    let audio_elements = document.getElementsByClassName("audio-src");
+    let hash = location.hash.substring(1);
+    currentAudioFile = audio_elements[hash-1];
+    playCurrentAudioFile();
+}
