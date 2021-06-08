@@ -224,7 +224,7 @@ document.querySelectorAll('.download-folder').forEach(el =>
                 .then((blob) =>
                 {
                     // Triggers the download
-                    let zipName = parentUL.getAttribute('data-name');
+                    let zipName = parentUL.getAttribute('data-name')+'.zip';
                     triggerDownload(zipName, blob);
                 });
             })
@@ -240,6 +240,7 @@ document.addEventListener("DOMContentLoaded", function()
 {
     let audio_elements = document.getElementsByClassName("audio-src");
     let hash = location.hash.substring(1);
+    if (isNaN(hash) || hash < 1 || hash > audio_elements.length) hash = 1; 
     currentAudioFile = audio_elements[hash-1];
     playCurrentAudioFile();
 });

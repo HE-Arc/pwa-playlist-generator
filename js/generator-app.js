@@ -248,9 +248,12 @@ document.querySelector('#input-pwa-description').addEventListener('change', (evt
 // Root folder input on change event
 document.querySelector('#input-pwa-root-folder').addEventListener('change', (evt) =>
 {
-    let files = evt.target.files;
+    let sortedFiles = [...evt.target.files].sort(function(a, b){
+        return (a.webkitRelativePath < b.webkitRelativePath) ? -1 : ((a.webkitRelativePath > b.webkitRelativePath) ? 1 : 0);
+    });
+
     // Builds a tree structure with the uploaded files
-    filesMap = buildFilesMap(files);
+    filesMap = buildFilesMap(sortedFiles);
 
     // Displays the HTML tree structure
     //document.querySelector('#audio-tree').innerHTML = audioTree;
