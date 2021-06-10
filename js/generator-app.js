@@ -205,6 +205,7 @@ function generatePWAZip(dataHtml, dataManifest)
             .then((blob) =>
             {
                 // Triggers the download
+                document.getElementById("loading").style.display = "none";
                 triggerDownload(title, blob);
             });
         })
@@ -275,6 +276,7 @@ document.querySelector('#input-icon512').addEventListener('change', (evt) =>
 document.querySelector('#btn-pwa-generate').addEventListener('click', (evt) =>
 {
     evt.preventDefault();
+    document.getElementById("loading").style.display = "flex";
 
     // Builds the HTML tree based on the tree structure
     audioFileID = 1;
