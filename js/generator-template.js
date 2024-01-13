@@ -66,9 +66,10 @@ function theme_none_tree_folder(name, folderTitle, folderContent, titleLevel)
 
 function theme_none_tree_file(name, title, webkitRelativePath, audioFileID)
 {
+    const encUri=encodeURI(webkitRelativePath);
     return `
-<li class="audio-file" href="${webkitRelativePath}">
-    <a href="${webkitRelativePath}" class="audio-src" data-id="${audioFileID}" data-title="${title}">${name}</a>
+<li class="audio-file">
+    <a href="${encUri}" class="audio-src" data-id="${audioFileID}" data-title="${title}">${title}</a>
     <a href="#" class="cache-audio">Cache</a>
     <a href="#" class="download-audio">Download</a>
 </li>
@@ -180,9 +181,10 @@ function theme_materialize_light_tree_folder(name, folderTitle, folderContent, t
 
 function theme_materialize_light_tree_file(name, title, webkitRelativePath, audioFileID)
 {
+    const encUri=encodeURI(webkitRelativePath);
     return `
-<li class="audio-file" href="${webkitRelativePath}">
-    <a href="${webkitRelativePath}" class="audio-src" data-id="${audioFileID}" data-title="${title}">${name}</a>
+<li class="audio-file">
+    <a href="${encUri}" class="audio-src" data-id="${audioFileID}" data-title="${title}">${title}</a>
     <a href="#" class="cache-audio"><i class="material-icons">cached</i></a>
     <a href="#" class="download-audio"><i class="material-icons">file_download</i></a>
 </li>
@@ -294,9 +296,10 @@ function theme_materialize_dark_tree_folder(name, folderTitle, folderContent, ti
 
 function theme_materialize_dark_tree_file(name, title, webkitRelativePath, audioFileID)
 {
+    const encUri=encodeURI(webkitRelativePath);
     return `
-<li class="audio-file" href="${webkitRelativePath}">
-    <a href="${webkitRelativePath}" class="audio-src" data-id="${audioFileID}" data-title="${title}">${name}</a>
+<li class="audio-file">
+    <a href="${encUri}" class="audio-src" data-id="${audioFileID}" data-title="${title}">${title}</a>
     <a href="#" class="cache-audio"><i class="material-icons">cached</i></a>
     <a href="#" class="download-audio"><i class="material-icons">file_download</i></a>
 </li>
